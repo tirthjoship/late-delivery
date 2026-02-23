@@ -1,0 +1,1 @@
+"""CSV data repository adapter."""
