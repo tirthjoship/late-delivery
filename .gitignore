@@ -1,0 +1,33 @@
+# Private local docs — never push
+LOCAL_PROJECT_STORY.md
+
+# Raw data — never commit large CSV files to Git
+data/raw/
+data/interim/
+data/processed/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Environments
+.env
+.venv
+env/
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# macOS
+.DS_Store
