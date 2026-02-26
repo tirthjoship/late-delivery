@@ -1,25 +1,30 @@
 # Supply Chain Optimization ML
 
-An end-to-end Machine Learning project focusing on **Demand Forecasting, Inventory Optimization (ABC Analysis), and Late Delivery Risk Prediction**. Built using robust **Hexagonal Architecture** and strictly driven by **Test-Driven Development (TDD)** principles.
+An end-to-end Machine Learning project focusing on Demand Forecasting, Inventory Optimization (ABC Analysis), and Late Delivery Risk Prediction. 
 
-This repository is designed to demonstrate production-grade ML engineering, specifically aligned with the operational complexities of major retailers and supply chain networks (e.g., Amazon, Walmart, Costco).
+This repository was designed to mirror production-grade ML engineering environments, specifically focusing on the operational challenges of retail and supply chain networks like Amazon, Walmart, or Costco. 
 
-## 🚀 Key Highlights
+## Key Highlights
 
-- **Aesthetic & Structural Governance:** Built using Python 3.12 with absolute strict typing (`mypy --strict`), auto-formatting (`black`, `isort`), and linting (`ruff`), all enforced by pre-commit hooks.
-- **Hexagonal Architecture:** The core ML business logic (`domain/`) is entirely decoupled from external infrastructure (csv files, databases, UI). Features zero data-leakage and extremely high maintainability.
-- **TDD First:** Includes a comprehensive suite of 44 tests using `pytest`, integrated with `Hypothesis` for robust property-based testing and edge-case validation to ensure audit-readiness.
-- **Deep EDA:** Analyzed a 180,000+ record supply chain dataset (`DataCo`) identifying a massive 54.83% baseline late delivery rate, driving a pivot from basic forecasting directly to proactive risk management.
+- **Quality & Standards:** Enforced strict typing (`mypy`), code formatting (`black`, `isort`), and linting (`ruff`) using pre-commit hooks.
+- **Hexagonal Architecture:** The core ML business logic (`domain/`) is completely decoupled from external integrations like CSV files or visualization UIs. This prevents target leakage and keeps the models highly testable.
+- **Test-Driven:** Implemented a suite of 44 tests using `pytest` alongside `Hypothesis` for edge-case property-based testing.
+- **Deep EDA:** Analyzed a 180,000+ record supply chain dataset (`DataCo`). I discovered a 54.83% baseline late delivery rate, which drove a pivot from simple forecasting directly to proactive risk management.
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **Core:** Python 3.12
-- **Testing:** Pytest, Hypothesis (Property-based testing)
+- **Testing:** Pytest, Hypothesis 
 - **Data & Modeling:** Pandas, NumPy, XGBoost, Scikit-Learn
 - **Experiment Tracking:** MLflow
 - **Architecture:** Hexagonal (Ports & Adapters)
 
-## 📦 How to Reproduce the Environment
+## Developer Tooling
+I built this project utilizing modern developer tools to treat ML as a mature software discipline:
+- **Cursor IDE:** Used as an intelligent autocomplete to speed up multi-file boilerplate and hexagonal scaffolding.
+- **Claude:** Used as a pair-programming assistant specifically during the TDD phase to generate edge-case property tests (`Hypothesis`) and audit the domain logic prior to ML modeling.
+
+## How to Reproduce the Environment
 
 To ensure perfect reproducibility, this project uses a strict `conda` environment. 
 
@@ -30,7 +35,7 @@ cd supply-chain-optimization-ml
 ```
 
 ### 2. Create and Activate the Conda Environment
-The `environment.yml` handles all core requirements:
+The `environment.yml` handles all dependencies:
 ```bash
 conda env create -f environment.yml
 conda activate supply-chain-ml
@@ -56,7 +61,7 @@ Ensure the 44 domain and property-based tests are passing on your machine to val
 pytest -v
 ```
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 supply-chain-optimization-ml/
@@ -67,13 +72,23 @@ supply-chain-optimization-ml/
 ├── notebooks/            # Jupyter Exploratory Data Analysis
 ├── data/                 # Ignored by git (raw, interim, processed data)
 ├── pyproject.toml        # Ruff, Black, Mypy configurations
-├── environment.yml       # Reproducible Conda dependencies
+└── environment.yml       # Reproducible Conda dependencies
 ```
 
-## 🔄 Project Phases
+## Project Phases
 
 - ✅ **Phase 0:** Governance & Architecture (Hooks, Configs, Hexagonal Scaffold)
 - ✅ **Phase 1:** Infrastructure Setup
 - ✅ **Phase 2:** Proactive Risk Mitigation & Stakeholder Intelligence (EDA)
 - ✅ **Phase 3:** Domain Implementation & TDD Audits (44 passing tests)
-- 🔜 **Phase 4:** XGBoost Pipeline, SHAP Explainability & Streamlit UI (In Progress)
+- 🔜 **Phase 4:** ML Pipeline & Streamlit UI
+
+## Author & Contributors
+
+- **Author:** Tirth Joshi
+- **Role:** Lead Data Scientist & ML Engineer
+- **Institution:** University of British Columbia (UBC MDS)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. This allows for open collaboration while maintaining creator attribution.
