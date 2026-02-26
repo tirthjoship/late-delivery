@@ -1,5 +1,7 @@
 # Private local docs — never push
 LOCAL_PROJECT_STORY.md
+PRODUCTION_READINESS_AUDIT.md
+.kiro/
 
 # Raw data — never commit large CSV files to Git
 data/raw/
