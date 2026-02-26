@@ -1,126 +1,94 @@
 # Supply Chain Optimization ML
 
-An end-to-end Machine Learning project analyzing 180,000+ e-commerce orders from the [DataCo Smart Supply Chain](https://www.kaggle.com/datasets/shashwatwork/dataco-smart-supply-chain-for-big-data-analysis) dataset.
+An end-to-end Machine Learning project focusing on Demand Forecasting, Inventory Optimization (ABC Analysis), and Late Delivery Risk Prediction. 
 
-## Business Questions
+This repository was designed to mirror production-grade ML engineering environments, specifically focusing on the operational challenges of retail and supply chain networks like Amazon, Walmart, or Costco. 
 
-This project was built around three core operational questions that routinely come up in retail and logistics data science roles:
+## Key Highlights
 
-1. **When will an order be late — and why?**  
-   Initial EDA revealed a 54.83% baseline late delivery rate across all shipping modes. First Class shipping fails 95.3% of the time — a structural logistics problem, not a demand issue. The goal is to predict late delivery risk *at the moment an order is placed*, using only information available at that point in time.
-
-2. **Which products should we prioritize for inventory?**  
-   Using ABC analysis across departments, I identified that Fan Shop drives the highest order volume (~66k orders) while Apparel yields the highest average profit margins (12.2%). This informs smarter restocking decisions.
-
-3. **How do we forecast demand without overfitting to seasonality noise?**  
-   Monthly sales trend analysis establishes a baseline for time-series forecasting, distinguishing genuine seasonal patterns from one-off spikes.
-
----
-
-## Key Technical Decisions
-
-- **Hexagonal Architecture:** The core ML business logic (`domain/`) is fully decoupled from data sources and UI. This means the domain model can be unit tested in isolation and the CSV adapter can be swapped for a database with zero changes to business logic.
-- **Strict leakage prevention:** Features like `Days for shipping (real)` and `Delivery Status` are excluded from all modeling. They encode the outcome, not the predictors.
-- **Property-based testing via Hypothesis:** Rather than writing individual test cases, I used generative testing to verify invariants (e.g. "delivery risk score must always be between 0 and 1 for any valid order").
-
----
+- **Quality & Standards:** Enforced strict typing (`mypy`), code formatting (`black`, `isort`), and linting (`ruff`) using pre-commit hooks.
+- **Hexagonal Architecture:** The core ML business logic (`domain/`) is completely decoupled from external integrations like CSV files or visualization UIs. This prevents target leakage and keeps the models highly testable.
+- **Test-Driven:** Implemented a suite of 44 tests using `pytest` alongside `Hypothesis` for edge-case property-based testing.
+- **Deep EDA:** Analyzed a 180,000+ record supply chain dataset (`DataCo`). I discovered a 54.83% baseline late delivery rate, which drove a pivot from simple forecasting directly to proactive risk management.
 
 ## Technology Stack
 
-| Category | Tools |
-|---|---|
-| Language | Python 3.12 |
-| ML Modeling | XGBoost, Scikit-Learn |
-| Experiment Tracking | MLflow |
-| Testing | Pytest, Hypothesis |
-| Data | Pandas, NumPy |
-| Code Quality | Black, Ruff, isort, Mypy |
-| Architecture | Hexagonal (Ports & Adapters) |
-
----
+- **Core:** Python 3.12
+- **Testing:** Pytest, Hypothesis 
+- **Data & Modeling:** Pandas, NumPy, XGBoost, Scikit-Learn
+- **Experiment Tracking:** MLflow
+- **Architecture:** Hexagonal (Ports & Adapters)
 
 ## Developer Tooling
+I built this project utilizing modern developer tools to treat ML as a mature software discipline:
+- **Cursor IDE:** Used as an intelligent autocomplete to speed up multi-file boilerplate and hexagonal scaffolding.
+- **Claude:** Used as a pair-programming assistant specifically during the TDD phase to generate edge-case property tests (`Hypothesis`) and audit the domain logic prior to ML modeling.
 
-I treated this project as a software engineering exercise, not just a data science one. That meant using tools the same way a professional team would — for code quality, planning, and test coverage:
+## How to Reproduce the Environment
 
-| Tool | How I Used It |
-|---|---|
-| **[Kiro](https://kiro.dev)** | Spec-driven planning — wrote acceptance criteria and EARS-notation requirements before any code. This kept the architecture from drifting mid-project. |
-| **[Cursor](https://cursor.com)** | IDE with context-aware code completion. Practical for wiring ports, adapters, and services across multiple files simultaneously. |
-| **Automated EDA pipeline** | Scripted data interrogation for leakage auditing, class imbalance checks, and visualization generation across the 180k+ record dataset. |
-| **AI pair reviewer** | Used during the TDD phase to run `pytest` iteratively and trace root causes of failing property-based tests in `domain/services.py`. |
+To ensure perfect reproducibility, this project uses a strict `conda` environment. 
 
----
-
-## How to Reproduce
-
-This project uses a strict `conda` environment for full reproducibility.
-
-### 1. Clone
+### 1. Clone the Repository
 ```bash
 git clone git@github.com:tirthjoship/supply-chain-optimization-ml.git
 cd supply-chain-optimization-ml
 ```
 
-### 2. Create the Environment
+### 2. Create and Activate the Conda Environment
+The `environment.yml` handles all dependencies:
 ```bash
 conda env create -f environment.yml
 conda activate supply-chain-ml
 ```
 
-### 3. Install Pre-commit Hooks
+### 3. Setup Pre-commit Hooks (Optional but Recommended)
+To maintain the strict linting and Python standards before you commit:
 ```bash
 pre-commit install
 ```
 
 ### 4. Fetch the Dataset
-The dataset is excluded from Git (91MB CSV). Download it via the Kaggle API:
+The dataset (DataCo Supply Chain) is massive and excluded from Git using `.gitignore`. Use the [Kaggle API](https://www.kaggle.com/docs/api) to retrieve it:
+
 ```bash
+# Ensure your Kaggle API token is configured (~/.kaggle/kaggle.json)
 kaggle datasets download -d shashwatwork/dataco-smart-supply-chain-for-big-data-analysis -p "data/raw" --unzip
 ```
 
-### 5. Validate the Domain (Run Tests)
+### 5. Run the Test Suite
+Ensure the 44 domain and property-based tests are passing on your machine to validate the Hexagonal Architecture:
 ```bash
 pytest -v
 ```
-All 44 tests should pass before any modeling begins.
-
----
 
 ## Project Structure
 
 ```text
 supply-chain-optimization-ml/
-├── domain/            # Business rules — no external dependencies allowed here
-├── adapters/          # CSV data reader, ML model adapter, visualization
-├── application/       # Wires domain to adapters
-├── tests/             # 44 unit + property-based tests
-├── notebooks/         # EDA notebooks
-├── data/              # Gitignored — raw, interim, processed data folders
-├── environment.yml    # Conda environment spec
-└── pyproject.toml     # Black, Ruff, Mypy config
+├── domain/               # Core business rules (Product, Order entities)
+├── adapters/             # External integration (CSV repos, Models, UI)
+├── application/          # Service interconnects
+├── tests/                # 44+ TDD Pytest & Hypothesis tests
+├── notebooks/            # Jupyter Exploratory Data Analysis
+├── data/                 # Ignored by git (raw, interim, processed data)
+├── pyproject.toml        # Ruff, Black, Mypy configurations
+└── environment.yml       # Reproducible Conda dependencies
 ```
-
----
 
 ## Project Phases
 
-- ✅ Phase 0 — Governance & toolchain setup
-- ✅ Phase 1 — Hexagonal architecture scaffold
-- ✅ Phase 2 — EDA: late delivery risk baseline, class imbalance audit, ABC analysis
-- ✅ Phase 3 — Domain implementation + 44 TDD tests
-- 🔜 Phase 4 — XGBoost pipeline, SHAP explainability, Streamlit dashboard
+- ✅ **Phase 0:** Governance & Architecture (Hooks, Configs, Hexagonal Scaffold)
+- ✅ **Phase 1:** Infrastructure Setup
+- ✅ **Phase 2:** Proactive Risk Mitigation & Stakeholder Intelligence (EDA)
+- ✅ **Phase 3:** Domain Implementation & TDD Audits (44 passing tests)
+- 🔜 **Phase 4:** ML Pipeline & Streamlit UI
 
----
+## Author & Contributors
 
-## Author
-
-**Tirth Joshi**  
-Master of Data Science, University of British Columbia  
-[github.com/tirthjoship](https://github.com/tirthjoship)
-
----
+- **Author:** Tirth Joshi
+- **Role:** Lead Data Scientist & ML Engineer
+- **Institution:** University of British Columbia (UBC MDS)
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. This allows for open collaboration while maintaining creator attribution.
