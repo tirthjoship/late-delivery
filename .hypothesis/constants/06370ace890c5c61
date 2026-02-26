@@ -1,0 +1,4 @@
+# file: /Users/tirthjoshi/miniforge3/envs/supply-chain-ml/bin/pytest
+# hypothesis_version: 6.151.9
+
+['.exe', '__main__']
