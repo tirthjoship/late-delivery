@@ -29,7 +29,7 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "-v --cov=. --cov-report=term-missing"
+addopts = "-v"
 
 [tool.black]
 line-length = 88
