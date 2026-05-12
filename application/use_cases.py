@@ -45,6 +45,7 @@ class TrainAndEvaluateUseCase:
         test_size: float = 0.2,
         random_state: int = 42,
         risk_threshold: float = 0.5,
+        run_name: str | None = None,
     ) -> TrainingResult:
         """Run full training pipeline and return results."""
         # 1. Load orders
@@ -70,7 +71,7 @@ class TrainAndEvaluateUseCase:
 
         # 5. Track experiment
         model_name = type(self._model).__name__
-        self._tracker.start_run(run_name=model_name)
+        self._tracker.start_run(run_name=run_name or model_name)
         self._tracker.log_params(
             {
                 "model": model_name,
@@ -81,6 +82,10 @@ class TrainAndEvaluateUseCase:
                 "n_test": str(len(raw_test)),
             }
         )
+
+        # Log model hyperparameters
+        model_params = self._model.get_params()
+        self._tracker.log_params({f"hp_{k}": str(v) for k, v in model_params.items()})
 
         # 6. Train
         self._model.train(X_train.values, y_train)
