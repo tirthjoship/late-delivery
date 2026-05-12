@@ -8,6 +8,9 @@ data/raw/
 data/interim/
 data/processed/
 
+# Hypothesis
+.hypothesis/
+
 # Python
 __pycache__/
 *.py[cod]

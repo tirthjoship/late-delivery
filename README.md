@@ -12,16 +12,16 @@ The initial data analysis surfaced something unexpected: over half of all orders
 
 ## Business Questions
 
-1. **Which orders are likely to arrive late, and what is driving the risk?**  
+1. **Which orders are likely to arrive late, and what is driving the risk?**
    I wanted to build a model that answers this question at the moment of order placement, using only information a logistics team would actually have at that point.
 
-2. **Which departments and products should be stocked first?**  
+2. **Which departments and products should be stocked first?**
    Fan Shop drives the most volume (around 66,000 orders), but Apparel has the higher profit margin at 12.2%. That distinction matters for inventory prioritization.
 
-3. **How stable is demand across months, and what seasonal patterns exist?**  
+3. **How stable is demand across months, and what seasonal patterns exist?**
    Monthly order trend analysis establishes the baseline for any future forecasting work.
 
-4. **Are there natural clusters of orders that share similar risk profiles, even without labels?**  
+4. **Are there natural clusters of orders that share similar risk profiles, even without labels?**
    K-Means clustering on order features will surface hidden groupings that supervised models might not expose on their own. For example, a cluster of orders might share a combination of shipping mode, region, and order value that makes them systematically high risk, even if no single factor is dominant.
 
 ## What This Project Will Uncover

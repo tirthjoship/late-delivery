@@ -267,3 +267,104 @@ class TestForecast:
         assert forecast_lower_only.confidence_upper is None
         assert forecast_upper_only.confidence_lower is None
         assert forecast_upper_only.confidence_upper == [110.0, 120.0]
+
+
+class TestMetricsResult:
+    """Tests for MetricsResult value object."""
+
+    def test_metrics_result_creation(self) -> None:
+        from domain.models import MetricsResult
+
+        metrics = MetricsResult(
+            f1=0.85,
+            precision=0.82,
+            recall=0.88,
+            auc_roc=0.91,
+            confusion_matrix=((100, 20), (15, 85)),
+        )
+        assert metrics.f1 == 0.85
+        assert metrics.precision == 0.82
+        assert metrics.recall == 0.88
+        assert metrics.auc_roc == 0.91
+        assert metrics.confusion_matrix == ((100, 20), (15, 85))
+
+    def test_metrics_result_is_frozen(self) -> None:
+        from domain.models import MetricsResult
+
+        metrics = MetricsResult(
+            f1=0.85,
+            precision=0.82,
+            recall=0.88,
+            auc_roc=0.91,
+            confusion_matrix=((100, 20), (15, 85)),
+        )
+        with pytest.raises(AttributeError):
+            metrics.f1 = 0.99  # type: ignore
+
+
+class TestTrainingResult:
+    """Tests for TrainingResult value object."""
+
+    def test_training_result_creation(self) -> None:
+        from domain.models import MetricsResult, TrainingResult
+
+        metrics = MetricsResult(
+            f1=0.85,
+            precision=0.82,
+            recall=0.88,
+            auc_roc=0.91,
+            confusion_matrix=((100, 20), (15, 85)),
+        )
+        result = TrainingResult(
+            model_name="xgboost",
+            metrics=metrics,
+            feature_importances={
+                "shipping_mode_First Class": 0.45,
+                "days_for_shipment_scheduled": 0.30,
+            },
+        )
+        assert result.model_name == "xgboost"
+        assert result.metrics.f1 == 0.85
+        assert result.feature_importances["shipping_mode_First Class"] == 0.45
+
+    def test_training_result_is_frozen(self) -> None:
+        from domain.models import MetricsResult, TrainingResult
+
+        metrics = MetricsResult(
+            f1=0.85,
+            precision=0.82,
+            recall=0.88,
+            auc_roc=0.91,
+            confusion_matrix=((100, 20), (15, 85)),
+        )
+        result = TrainingResult(
+            model_name="xgboost", metrics=metrics, feature_importances={}
+        )
+        with pytest.raises(AttributeError):
+            result.model_name = "logreg"  # type: ignore
+
+
+class TestPredictionResult:
+    """Tests for PredictionResult value object."""
+
+    def test_prediction_result_creation(self) -> None:
+        from domain.models import PredictionResult
+
+        result = PredictionResult(
+            probability=0.87,
+            risk_label=True,
+            explanation={
+                "shipping_mode_First Class": 0.35,
+                "days_for_shipment_scheduled": 0.20,
+            },
+        )
+        assert result.probability == 0.87
+        assert result.risk_label is True
+        assert result.explanation["shipping_mode_First Class"] == 0.35
+
+    def test_prediction_result_is_frozen(self) -> None:
+        from domain.models import PredictionResult
+
+        result = PredictionResult(probability=0.87, risk_label=True, explanation={})
+        with pytest.raises(AttributeError):
+            result.probability = 0.50  # type: ignore

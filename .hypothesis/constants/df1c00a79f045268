@@ -1,4 +1,0 @@
-# file: /Users/tirthjoshi/My Data Science Projects/ML_Portfolio_Projects/supply-chain-optimization-ml/adapters/data/csv_repository.py
-# hypothesis_version: 6.151.9
-
-[0.0, '+00:00', '2000-01-01', 'Benefit per order', 'Category Name', 'Delivery Status', 'Late_delivery_risk', 'Order City', 'Order Country', 'Order Customer Id', 'Order Id', 'Order Item Discount', 'Order Item Id', 'Order Item Quantity', 'Order Item Total', 'Order Region', 'Order State', 'Order Status', 'Order Zipcode', 'Product Card Id', 'Product Category Id', 'Product Name', 'Product Price', 'Product Status', 'Sales', 'Sales per customer', 'Shipping Mode', 'T', 'Z', '_order_date', 'benefit_per_order', 'coerce', 'first', 'inf', 'late_delivery_risk', 'latin-1', 'nan', 'order_city', 'order_country', 'order_customer_id', 'order_date', 'order_id', 'order_region', 'order_state', 'order_status', 'order_zipcode', 'sales_per_customer', 'shipping_mode', 'to_pydatetime']
