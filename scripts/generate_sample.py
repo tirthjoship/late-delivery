@@ -82,9 +82,7 @@ def main() -> None:
     ontime_rows = df_clean[df_clean["Late_delivery_risk"] == 0].sample(
         n=n_ontime, random_state=42
     )
-    sample = pd.concat([late_rows, ontime_rows]).sample(
-        frac=1, random_state=42
-    )
+    sample = pd.concat([late_rows, ontime_rows]).sample(frac=1, random_state=42)
 
     SAMPLE_DIR.mkdir(parents=True, exist_ok=True)
     sample.to_csv(SAMPLE_PATH, index=False)
