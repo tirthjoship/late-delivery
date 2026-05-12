@@ -23,16 +23,16 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from adapters.data.csv_repository import DataCoCSVRepository
-from adapters.ml.feature_encoder import FeatureEncoder
-from adapters.ml.mlflow_tracker import MLflowTracker
-from adapters.ml.shap_explainer import ShapExplainer
-from adapters.ml.sklearn_predictor import (
+from adapters.data.csv_repository import DataCoCSVRepository  # noqa: E402
+from adapters.ml.feature_encoder import FeatureEncoder  # noqa: E402
+from adapters.ml.mlflow_tracker import MLflowTracker  # noqa: E402
+from adapters.ml.shap_explainer import ShapExplainer  # noqa: E402
+from adapters.ml.sklearn_predictor import (  # noqa: E402
     LogisticRegressionPredictor,
     XGBoostPredictor,
 )
-from application.use_cases import TrainAndEvaluateUseCase
-from domain.models import TrainingResult
+from application.use_cases import TrainAndEvaluateUseCase  # noqa: E402
+from domain.models import TrainingResult  # noqa: E402
 
 # Model configurations: (run_name, model_instance)
 MODEL_CONFIGS: dict[str, tuple[str, object]] = {
