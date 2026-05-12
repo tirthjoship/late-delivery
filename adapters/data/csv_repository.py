@@ -6,6 +6,7 @@ Excludes leakage columns as identified in EDA (notebooks/eda_initial.ipynb).
 
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from domain.exceptions import DomainError
 from domain.models import Order, OrderItem, Product
@@ -15,6 +16,7 @@ class CSVValidationError(DomainError):
     """Raised when CSV file is missing required columns or is invalid."""
 
     pass
+
 
 # Columns that leak the target (Late_delivery_risk) — must not be used for modeling.
 # EDA: Days for shipping (real), Delivery Status, shipping date (DateOrders).
@@ -54,7 +56,7 @@ def _parse_order_date(value: object) -> datetime:
     if isinstance(value, datetime):
         return value
     if hasattr(value, "to_pydatetime"):
-        return value.to_pydatetime()
+        return datetime.fromisoformat(str(value))
     s = str(value).strip()
     return datetime.fromisoformat(s.replace("Z", "+00:00").replace(" ", "T"))
 
@@ -64,7 +66,7 @@ def _safe_int(val: object, default: int = 0) -> int:
     if val is None or (isinstance(val, float) and (val != val or val == float("inf"))):
         return default
     try:
-        return int(float(val))
+        return int(float(str(val)))
     except (ValueError, TypeError):
         return default
 
@@ -74,7 +76,7 @@ def _safe_float(val: object, default: float = 0.0) -> float:
     if val is None or (isinstance(val, float) and (val != val)):
         return default
     try:
-        return float(val)
+        return float(str(val))
     except (ValueError, TypeError):
         return default
 
@@ -130,9 +132,7 @@ class DataCoCSVRepository:
 
         # Validate file exists
         if not self._path.exists():
-            raise CSVValidationError(
-                f"CSV file not found: {self._path}"
-            )
+            raise CSVValidationError(f"CSV file not found: {self._path}")
 
         # Load CSV with error handling
         try:
@@ -162,14 +162,18 @@ class DataCoCSVRepository:
             df["_order_date"] = pd.NaT
 
         orders_dict: dict[int, list[OrderItem]] = {}
-        order_meta: dict[int, dict] = {}
+        order_meta: dict[int, dict[str, Any]] = {}
 
         for _, row in df.iterrows():
             oid = _safe_int(row.get("Order Id"))
             if oid == 0:
                 continue
             dt = row.get("_order_date")
-            order_dt = _parse_order_date(dt) if pd.notna(dt) else _parse_order_date("2000-01-01")
+            order_dt = (
+                _parse_order_date(dt)
+                if pd.notna(dt)
+                else _parse_order_date("2000-01-01")
+            )
 
             if oid not in order_meta:
                 order_meta[oid] = {
@@ -193,7 +197,10 @@ class DataCoCSVRepository:
                     ),
                     "late_delivery_risk": None,
                 }
-            if "Late_delivery_risk" in df.columns and order_meta[oid]["late_delivery_risk"] is None:
+            if (
+                "Late_delivery_risk" in df.columns
+                and order_meta[oid]["late_delivery_risk"] is None
+            ):
                 val = row.get("Late_delivery_risk")
                 if val is not None and str(val).strip() not in ("", "nan"):
                     v = _safe_int(val, default=-1)
@@ -255,9 +262,7 @@ class DataCoCSVRepository:
 
         # Validate file exists
         if not self._path.exists():
-            raise CSVValidationError(
-                f"CSV file not found: {self._path}"
-            )
+            raise CSVValidationError(f"CSV file not found: {self._path}")
 
         # Load CSV with error handling
         try:

@@ -126,13 +126,9 @@ class Forecast:
         """Validate consistent lengths when confidence is provided."""
         n = len(self.point_forecast)
         if self.confidence_lower is not None and len(self.confidence_lower) != n:
-            raise ValueError(
-                "confidence_lower length must match point_forecast"
-            )
+            raise ValueError("confidence_lower length must match point_forecast")
         if self.confidence_upper is not None and len(self.confidence_upper) != n:
-            raise ValueError(
-                "confidence_upper length must match point_forecast"
-            )
+            raise ValueError("confidence_upper length must match point_forecast")
 
 
 @dataclass(frozen=True)

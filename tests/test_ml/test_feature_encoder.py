@@ -50,9 +50,9 @@ class TestFeatureEncoder:
         names = encoder.get_feature_names()
         for name in names:
             for leak_col in LEAKAGE_COLUMNS:
-                assert leak_col not in name, (
-                    f"Leakage column '{leak_col}' found in feature name '{name}'"
-                )
+                assert (
+                    leak_col not in name
+                ), f"Leakage column '{leak_col}' found in feature name '{name}'"
 
     def test_fit_on_train_transform_on_test(self, synthetic_orders) -> None:
         """Encoder fit on subset A can transform subset B without error."""

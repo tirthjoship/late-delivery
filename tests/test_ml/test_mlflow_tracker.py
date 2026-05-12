@@ -4,8 +4,6 @@ Integration tests using tmp_path as tracking URI.
 Real MLflow calls, auto-cleanup via pytest tmp_path fixture.
 """
 
-import pytest
-
 from adapters.ml.mlflow_tracker import MLflowTracker
 
 
@@ -37,8 +35,8 @@ class TestMLflowTracker:
         tracker.end_run()
 
     def test_log_model_creates_artifact(self, tmp_path) -> None:
-        from sklearn.linear_model import LogisticRegression
         import numpy as np
+        from sklearn.linear_model import LogisticRegression
 
         model = LogisticRegression()
         model.fit(np.array([[1, 2], [3, 4]]), np.array([0, 1]))
@@ -53,8 +51,8 @@ class TestMLflowTracker:
 
     def test_full_workflow(self, tmp_path) -> None:
         """End-to-end: start -> params -> metrics -> model -> register -> end."""
-        from sklearn.linear_model import LogisticRegression
         import numpy as np
+        from sklearn.linear_model import LogisticRegression
 
         model = LogisticRegression()
         model.fit(np.array([[1, 2], [3, 4]]), np.array([0, 1]))

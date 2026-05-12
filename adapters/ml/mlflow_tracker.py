@@ -4,11 +4,11 @@ Implements ExperimentTrackerPort. Local tracking with Model Registry.
 tracking_uri parameter is the seam for future remote MLflow (Decision D3).
 """
 
-import joblib
 import tempfile
 from pathlib import Path
 from typing import Any
 
+import joblib
 import mlflow
 from mlflow.tracking import MlflowClient
 

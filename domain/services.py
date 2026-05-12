@@ -10,9 +10,7 @@ from .models import Order
 # Shipping modes identified in EDA (DataCo): First Class, Same Day, Second Class, Standard Class.
 # Per LOCAL_PROJECT_STORY.md: First Class (95.3% late), Second Class (76.6% late), Standard (38% late).
 # First Class and Second Class are HIGH-RISK, not Standard Class.
-HIGH_RISK_SHIPPING_MODES: frozenset[str] = frozenset(
-    {"First Class", "Second Class"}
-)
+HIGH_RISK_SHIPPING_MODES: frozenset[str] = frozenset({"First Class", "Second Class"})
 
 
 def is_high_risk_shipping_mode(shipping_mode: str) -> bool:
@@ -82,7 +80,10 @@ def baseline_late_delivery_risk_flag(
     """
     if is_high_risk_shipping_mode(order.shipping_mode):
         return True
-    if use_scheduled_days_threshold and order.days_for_shipment_scheduled > scheduled_days_threshold:
+    if (
+        use_scheduled_days_threshold
+        and order.days_for_shipment_scheduled > scheduled_days_threshold
+    ):
         return True
     return False
 

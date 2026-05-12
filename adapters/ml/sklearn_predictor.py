@@ -19,21 +19,26 @@ class LogisticRegressionPredictor:
 
     def __init__(self, max_iter: int = 1000, random_state: int = 42) -> None:
         self._model = LogisticRegression(
-            max_iter=max_iter, random_state=random_state, solver="lbfgs",
+            max_iter=max_iter,
+            random_state=random_state,
+            solver="lbfgs",
         )
 
     def train(self, X: np.ndarray, y: np.ndarray) -> None:
         self._model.fit(X, y)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        return self._model.predict(X)
+        result: np.ndarray = self._model.predict(X)
+        return result
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
-        return self._model.predict_proba(X)[:, 1]
+        result: np.ndarray = self._model.predict_proba(X)[:, 1]
+        return result
 
     @property
     def coef_(self) -> np.ndarray:
-        return self._model.coef_
+        result: np.ndarray = self._model.coef_
+        return result
 
     @property
     def model(self) -> LogisticRegression:
@@ -56,19 +61,24 @@ class XGBoostPredictor:
         random_state: int = 42,
     ) -> None:
         self._model = XGBClassifier(
-            n_estimators=n_estimators, max_depth=max_depth,
-            learning_rate=learning_rate, scale_pos_weight=scale_pos_weight,
-            eval_metric="logloss", random_state=random_state,
+            n_estimators=n_estimators,
+            max_depth=max_depth,
+            learning_rate=learning_rate,
+            scale_pos_weight=scale_pos_weight,
+            eval_metric="logloss",
+            random_state=random_state,
         )
 
     def train(self, X: np.ndarray, y: np.ndarray) -> None:
         self._model.fit(X, y)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        return self._model.predict(X)
+        result: np.ndarray = self._model.predict(X)
+        return result
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
-        return self._model.predict_proba(X)[:, 1]
+        result: np.ndarray = self._model.predict_proba(X)[:, 1]
+        return result
 
     @property
     def model(self) -> XGBClassifier:

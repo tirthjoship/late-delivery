@@ -15,7 +15,7 @@ from sklearn.model_selection import train_test_split
 
 from adapters.ml.evaluation import compute_metrics
 from adapters.ml.feature_encoder import FeatureEncoder
-from domain.models import PredictionResult, TrainingResult, Order
+from domain.models import Order, PredictionResult, TrainingResult
 from domain.ports import ExperimentTrackerPort, ModelTrainerPort
 from domain.services import extract_features
 
@@ -31,7 +31,7 @@ class TrainAndEvaluateUseCase:
         data_repo: Any,
         feature_encoder: FeatureEncoder,
         model: ModelTrainerPort,
-        explainer_factory: Callable,
+        explainer_factory: Callable[..., Any],
         tracker: ExperimentTrackerPort,
     ) -> None:
         self._data_repo = data_repo
@@ -56,8 +56,11 @@ class TrainAndEvaluateUseCase:
 
         # 3. SPLIT FIRST — before any encoding
         raw_train, raw_test, y_train, y_test = train_test_split(
-            raw_features, labels, test_size=test_size,
-            random_state=random_state, stratify=labels,
+            raw_features,
+            labels,
+            test_size=test_size,
+            random_state=random_state,
+            stratify=labels,
         )
 
         # 4. Encode — fit on train ONLY
@@ -68,14 +71,16 @@ class TrainAndEvaluateUseCase:
         # 5. Track experiment
         model_name = type(self._model).__name__
         self._tracker.start_run(run_name=model_name)
-        self._tracker.log_params({
-            "model": model_name,
-            "test_size": str(test_size),
-            "random_state": str(random_state),
-            "n_features": str(len(feature_names)),
-            "n_train": str(len(raw_train)),
-            "n_test": str(len(raw_test)),
-        })
+        self._tracker.log_params(
+            {
+                "model": model_name,
+                "test_size": str(test_size),
+                "random_state": str(random_state),
+                "n_features": str(len(feature_names)),
+                "n_train": str(len(raw_train)),
+                "n_test": str(len(raw_test)),
+            }
+        )
 
         # 6. Train
         self._model.train(X_train.values, y_train)
@@ -86,12 +91,14 @@ class TrainAndEvaluateUseCase:
         metrics = compute_metrics(y_test, y_pred, y_proba)
 
         # 8. Log metrics
-        self._tracker.log_metrics({
-            "f1": metrics.f1,
-            "precision": metrics.precision,
-            "recall": metrics.recall,
-            "auc_roc": metrics.auc_roc,
-        })
+        self._tracker.log_metrics(
+            {
+                "f1": metrics.f1,
+                "precision": metrics.precision,
+                "recall": metrics.recall,
+                "auc_roc": metrics.auc_roc,
+            }
+        )
 
         # 9. Explain
         explainer = self._explainer_factory(self._model, feature_names)

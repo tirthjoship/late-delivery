@@ -26,6 +26,7 @@ repos:
     hooks:
       - id: mypy
         args: ["--strict"]
+        files: ^(domain|adapters|application)/
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.15

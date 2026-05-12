@@ -62,8 +62,7 @@ class ShapExplainer:
         shap_values = self._get_shap_values(X)
         mean_abs = np.abs(shap_values).mean(axis=0)
         importances = {
-            name: float(val)
-            for name, val in zip(self._feature_names, mean_abs)
+            name: float(val) for name, val in zip(self._feature_names, mean_abs)
         }
         return ShapGlobalResult(
             feature_importances=importances,
@@ -81,7 +80,9 @@ class ShapExplainer:
         # Binary classifiers may return array of expected values (one per class)
         expected = (
             float(ev[1])
-            if isinstance(ev, (list, np.ndarray)) and np.asarray(ev).ndim > 0 and len(ev) > 1
+            if isinstance(ev, (list, np.ndarray))
+            and np.asarray(ev).ndim > 0
+            and len(ev) > 1
             else float(ev)
         )
         return ShapLocalResult(shap_values=local_values, expected_value=expected)
@@ -94,5 +95,6 @@ class ShapExplainer:
             sv = sv.values
         # TreeExplainer for binary classification may return list of 2 arrays
         if isinstance(sv, list):
-            return sv[1]  # positive class
-        return sv
+            result: np.ndarray = sv[1]  # positive class
+            return result
+        return np.asarray(sv)

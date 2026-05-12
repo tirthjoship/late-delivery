@@ -4,6 +4,8 @@ Transforms raw feature dicts from domain/services.extract_features()
 into model-ready numeric arrays using sklearn preprocessing.
 """
 
+from typing import Any
+
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -38,7 +40,7 @@ class FeatureEncoder:
         self._pipeline: Pipeline | None = None
         self._feature_names: list[str] | None = None
 
-    def fit(self, raw_features: list[dict]) -> "FeatureEncoder":
+    def fit(self, raw_features: list[dict[str, Any]]) -> "FeatureEncoder":
         """Fit encoder on raw feature dicts. Must be called on training data ONLY."""
         df = pd.DataFrame(raw_features)
         preprocessor = ColumnTransformer(
@@ -56,7 +58,7 @@ class FeatureEncoder:
         self._feature_names = self._build_feature_names()
         return self
 
-    def transform(self, raw_features: list[dict]) -> pd.DataFrame:
+    def transform(self, raw_features: list[dict[str, Any]]) -> pd.DataFrame:
         """Transform raw feature dicts using fitted encoder."""
         if self._pipeline is None:
             raise RuntimeError("FeatureEncoder is not fitted. Call fit() first.")
@@ -64,7 +66,7 @@ class FeatureEncoder:
         transformed = self._pipeline.transform(df)
         return pd.DataFrame(transformed, columns=self._feature_names)
 
-    def fit_transform(self, raw_features: list[dict]) -> pd.DataFrame:
+    def fit_transform(self, raw_features: list[dict[str, Any]]) -> pd.DataFrame:
         """Fit and transform in one step."""
         self.fit(raw_features)
         return self.transform(raw_features)

@@ -6,7 +6,6 @@ All fixtures use small synthetic data. Never load the real 180k-row CSV.
 from datetime import datetime
 
 import numpy as np
-import pandas as pd
 import pytest
 
 from domain.models import Order, OrderItem
@@ -109,12 +108,6 @@ def synthetic_orders_distinctive_sales() -> tuple[list[Order], list[Order]]:
 
     Used to verify encoder is fit on train only (output-based test).
     """
-    train = [
-        _make_order(i, "Standard Class", 3, 1, sales=1000.0)
-        for i in range(50)
-    ]
-    test = [
-        _make_order(i + 50, "Standard Class", 3, 0, sales=0.0)
-        for i in range(50)
-    ]
+    train = [_make_order(i, "Standard Class", 3, 1, sales=1000.0) for i in range(50)]
+    test = [_make_order(i + 50, "Standard Class", 3, 0, sales=0.0) for i in range(50)]
     return train, test
