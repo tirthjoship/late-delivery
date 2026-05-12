@@ -76,9 +76,16 @@ Five hard stops — see `AGENTS.md` for full details:
 ## Phase Status
 
 **Done:**
-- Domain layer (models, ports, services, exceptions) — 280 lines
+- Domain layer (models, ports, services, exceptions) — MetricsResult, TrainingResult, PredictionResult, extract_features()
+- Domain ports — SalesDataRepository, ModelTrainerPort, ExplainerPort, ExperimentTrackerPort
 - CSV adapter with leakage shield — 307 lines
-- Test suite (56 tests) — domain, adapter, property-based
+- Feature encoder adapter — ColumnTransformer (OneHotEncoder + StandardScaler)
+- ML model adapters — LogisticRegressionPredictor + XGBoostPredictor
+- Evaluation adapter — compute_metrics() returning domain MetricsResult
+- SHAP explainer adapter — global + local explanations (TreeExplainer/LinearExplainer)
+- MLflow tracker adapter — local tracking + Model Registry
+- Application use cases — TrainAndEvaluateUseCase + PredictSingleOrderUseCase
+- Test suite (105 tests, 92% coverage) — domain, adapter, property-based, integration
 - EDA notebook — full analysis of 180k orders
 - CI workflows (test + lint + security) — 3 GitHub Actions
 - Pre-commit hooks — black, isort, mypy strict, ruff, gitleaks, file hygiene
@@ -88,18 +95,14 @@ Five hard stops — see `AGENTS.md` for full details:
 - PR and issue templates
 
 **Skeleton (1-line stubs):**
-- `adapters/ml/sklearn_predictor.py` — ML model adapter
 - `adapters/ml/pytorch_predictor.py` — neural net adapter
 - `adapters/visualization/plotly_charts.py` — charting adapter
 - `adapters/data/database_repository.py` — DB adapter
 - `adapters/data/api_client.py` — API adapter
-- `application/use_cases.py` — orchestration layer
 
 **Planned:**
-- ML model training adapter (framework TBD — architecture supports any)
-- Experiment tracking (MLflow or similar)
-- Model explainability (SHAP or similar)
-- Application layer orchestration
-- Streamlit dashboard
-- Expanded CI (lint, security, release workflows)
+- Streamlit dashboard (Phase 5)
+- SHAP dependence/cohort plots (Phase 5)
+- K-Means clustering (Phase 4.5)
+- Expanded CI (coverage gate, performance regression)
 - Observability (structured logging, tracing)
