@@ -7,7 +7,6 @@ Validates that the adapter correctly implements the SalesDataRepository port.
 import tempfile
 from pathlib import Path
 
-import pandas as pd
 import pytest
 
 from adapters.data.csv_repository import (
@@ -32,9 +31,7 @@ class TestCSVValidationErrors:
     def test_missing_required_columns_raises_error(self) -> None:
         """Test that missing required columns raises CSVValidationError."""
         # Arrange - Create a CSV with incomplete columns
-        with tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix=".csv"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as f:
             f.write("Order Id,Order Status\n")
             f.write("1,Complete\n")
             temp_path = f.name
@@ -54,9 +51,7 @@ class TestCSVValidationErrors:
         """Test that corrupted CSV file raises CSVValidationError."""
         # Arrange - Create a corrupted CSV (pandas can read garbage as single column,
         # so we verify it fails on missing required columns instead)
-        with tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix=".csv"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as f:
             f.write("This is not a valid CSV file!@#$%^&*()")
             temp_path = f.name
 
@@ -75,9 +70,7 @@ class TestLeakageColumnExclusion:
 
     def _create_minimal_csv_with_leakage(self) -> str:
         """Create a minimal valid CSV with leakage columns."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix=".csv"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as f:
             # Write header with required columns + leakage columns
             f.write(
                 "Order Id,order date (DateOrders),Order Customer Id,"
@@ -128,9 +121,7 @@ class TestDataCoCSVRepositoryOrders:
 
     def _create_minimal_valid_csv(self) -> str:
         """Create a minimal valid CSV for testing."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix=".csv"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as f:
             f.write(
                 "Order Id,order date (DateOrders),Order Customer Id,"
                 "Order Region,Order Country,Order State,Order Status,"
@@ -218,9 +209,7 @@ class TestDataCoCSVRepositoryProducts:
 
     def _create_minimal_product_csv(self) -> str:
         """Create a minimal valid CSV with product data."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix=".csv"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as f:
             f.write(
                 "Product Card Id,Product Category Id,Category Name,"
                 "Product Name,Product Price,Product Status\n"
@@ -288,9 +277,7 @@ class TestDataCoCSVRepositoryProducts:
     def test_missing_product_columns_raises_error(self) -> None:
         """Test that missing product columns raises CSVValidationError."""
         # Arrange
-        with tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix=".csv"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as f:
             f.write("Product Card Id,Product Name\n")
             f.write("PROD-001,Laptop\n")
             temp_path = f.name

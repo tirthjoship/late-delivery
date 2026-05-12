@@ -84,7 +84,7 @@ Ports use `Any` for X/y because domain cannot import numpy/pandas. Adapters type
 ```python
 def extract_features(order: Order) -> dict[str, float | str]:
     """Extract ML features from order using only pre-shipment data.
-    
+
     Returns raw feature dict. Encoding (one-hot, scaling) is adapter's job.
     Label (late_delivery_risk) is NOT included — kept separate to prevent leakage.
     """

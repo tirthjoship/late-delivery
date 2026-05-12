@@ -4,15 +4,14 @@ Integration tests: verify use cases wire domain + adapters correctly.
 Uses synthetic_orders fixture (100 orders, never real CSV).
 """
 
-import pytest
 import numpy as np
+import pytest
 
-from application.use_cases import TrainAndEvaluateUseCase, PredictSingleOrderUseCase
 from adapters.ml.feature_encoder import FeatureEncoder
-from adapters.ml.sklearn_predictor import XGBoostPredictor, LogisticRegressionPredictor
 from adapters.ml.shap_explainer import ShapExplainer
-from adapters.ml.evaluation import compute_metrics
-from domain.models import MetricsResult, TrainingResult, PredictionResult, Order
+from adapters.ml.sklearn_predictor import LogisticRegressionPredictor, XGBoostPredictor
+from application.use_cases import PredictSingleOrderUseCase, TrainAndEvaluateUseCase
+from domain.models import MetricsResult, Order, PredictionResult, TrainingResult
 
 
 class FakeSalesDataRepository:

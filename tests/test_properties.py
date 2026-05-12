@@ -6,19 +6,25 @@ Demonstrates advanced testing techniques expected at Amazon/Walmart.
 
 from datetime import datetime
 
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 
 from domain.models import Forecast, Order, OrderItem
-from domain.services import baseline_late_delivery_risk_flag, extract_features, is_high_risk_shipping_mode
-
+from domain.services import (
+    baseline_late_delivery_risk_flag,
+    extract_features,
+    is_high_risk_shipping_mode,
+)
 
 # Strategy for valid shipping modes
-shipping_mode_strategy = st.sampled_from([
-    "First Class",
-    "Second Class",
-    "Standard Class",
-    "Same Day",
-])
+shipping_mode_strategy = st.sampled_from(
+    [
+        "First Class",
+        "Second Class",
+        "Standard Class",
+        "Same Day",
+    ]
+)
 
 
 def order_item_strategy() -> st.SearchStrategy[OrderItem]:
@@ -28,12 +34,24 @@ def order_item_strategy() -> st.SearchStrategy[OrderItem]:
         order_item_id=st.integers(min_value=1, max_value=100000),
         product_card_id=st.text(min_size=1, max_size=20),
         quantity=st.integers(min_value=1, max_value=100),
-        unit_price=st.floats(min_value=0.01, max_value=5000.0, allow_nan=False, allow_infinity=False),
-        discount=st.floats(min_value=0.0, max_value=500.0, allow_nan=False, allow_infinity=False),
-        discount_rate=st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
-        profit_ratio=st.floats(min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False),
-        sales=st.floats(min_value=0.0, max_value=50000.0, allow_nan=False, allow_infinity=False),
-        item_total=st.floats(min_value=0.0, max_value=50000.0, allow_nan=False, allow_infinity=False),
+        unit_price=st.floats(
+            min_value=0.01, max_value=5000.0, allow_nan=False, allow_infinity=False
+        ),
+        discount=st.floats(
+            min_value=0.0, max_value=500.0, allow_nan=False, allow_infinity=False
+        ),
+        discount_rate=st.floats(
+            min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
+        ),
+        profit_ratio=st.floats(
+            min_value=-1.0, max_value=1.0, allow_nan=False, allow_infinity=False
+        ),
+        sales=st.floats(
+            min_value=0.0, max_value=50000.0, allow_nan=False, allow_infinity=False
+        ),
+        item_total=st.floats(
+            min_value=0.0, max_value=50000.0, allow_nan=False, allow_infinity=False
+        ),
     )
 
 
@@ -48,7 +66,9 @@ def order_strategy() -> st.SearchStrategy[Order]:
             max_value=datetime(2025, 12, 31),
         ),
         order_customer_id=st.integers(min_value=1, max_value=100000),
-        order_region=st.sampled_from(["North America", "Europe", "Asia", "South America"]),
+        order_region=st.sampled_from(
+            ["North America", "Europe", "Asia", "South America"]
+        ),
         order_country=st.text(min_size=2, max_size=50),
         order_state=st.text(min_size=2, max_size=50),
         order_status=st.sampled_from(["Complete", "Pending", "Canceled", "Processing"]),
@@ -56,9 +76,15 @@ def order_strategy() -> st.SearchStrategy[Order]:
         order_zipcode=st.text(min_size=5, max_size=10),
         shipping_mode=shipping_mode_strategy,
         days_for_shipment_scheduled=st.integers(min_value=1, max_value=30),
-        benefit_per_order=st.floats(min_value=0.0, max_value=10000.0, allow_nan=False, allow_infinity=False),
-        sales_per_customer=st.floats(min_value=0.0, max_value=100000.0, allow_nan=False, allow_infinity=False),
-        order_profit_per_order=st.floats(min_value=-1000.0, max_value=10000.0, allow_nan=False, allow_infinity=False),
+        benefit_per_order=st.floats(
+            min_value=0.0, max_value=10000.0, allow_nan=False, allow_infinity=False
+        ),
+        sales_per_customer=st.floats(
+            min_value=0.0, max_value=100000.0, allow_nan=False, allow_infinity=False
+        ),
+        order_profit_per_order=st.floats(
+            min_value=-1000.0, max_value=10000.0, allow_nan=False, allow_infinity=False
+        ),
         items=st.lists(order_item_strategy(), min_size=1, max_size=5),
         late_delivery_risk=st.one_of(st.none(), st.sampled_from([0, 1])),
     )
@@ -233,8 +259,6 @@ class TestForecastProperties:
         point_forecast = [100.0] * n
         correct_lower = [90.0] * n
         correct_upper = [110.0] * n
-        wrong_lower = [90.0] * (n + lower_diff)
-        wrong_upper = [110.0] * (n - upper_diff) if n > upper_diff else [110.0]
 
         # Act & Assert - correct lengths should work
         forecast_correct = Forecast(
@@ -271,20 +295,32 @@ class TestExtractFeaturesProperties:
     def test_extract_features_returns_fixed_key_set(self, order: Order) -> None:
         features = extract_features(order)
         expected_keys = {
-            "shipping_mode", "days_for_shipment_scheduled",
-            "order_month", "order_day_of_week", "order_region",
-            "benefit_per_order", "sales_per_customer", "order_profit_per_order",
-            "item_count", "total_quantity", "total_discount", "avg_unit_price",
+            "shipping_mode",
+            "days_for_shipment_scheduled",
+            "order_month",
+            "order_day_of_week",
+            "order_region",
+            "benefit_per_order",
+            "sales_per_customer",
+            "order_profit_per_order",
+            "item_count",
+            "total_quantity",
+            "total_discount",
+            "avg_unit_price",
         }
         assert set(features.keys()) == expected_keys
 
     @given(order=order_strategy())
-    def test_extract_features_never_contains_leakage_keywords(self, order: Order) -> None:
+    def test_extract_features_never_contains_leakage_keywords(
+        self, order: Order
+    ) -> None:
         features = extract_features(order)
         leakage_words = {"real", "delivery_status", "shipping_date"}
         for key in features:
             for word in leakage_words:
-                assert word not in key.lower(), f"Leakage keyword '{word}' in key '{key}'"
+                assert (
+                    word not in key.lower()
+                ), f"Leakage keyword '{word}' in key '{key}'"
 
     @given(order=order_strategy())
     def test_extract_features_label_never_present(self, order: Order) -> None:

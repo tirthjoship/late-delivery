@@ -42,3 +42,23 @@ profile = "black"
 [tool.mypy]
 python_version = "3.12"
 strict = true
+
+[[tool.mypy.overrides]]
+module = [
+    "numpy",
+    "numpy.*",
+    "pandas",
+    "pandas.*",
+    "sklearn",
+    "sklearn.*",
+    "xgboost",
+    "xgboost.*",
+    "shap",
+    "shap.*",
+    "mlflow",
+    "mlflow.*",
+    "joblib",
+    "joblib.*",
+]
+ignore_missing_imports = true
+follow_imports = "skip"

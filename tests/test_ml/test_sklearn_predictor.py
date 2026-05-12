@@ -32,7 +32,9 @@ class TestLogisticRegressionPredictor:
         preds = model.predict(X)
         assert set(np.unique(preds)).issubset({0, 1})
 
-    def test_predict_proba_returns_valid_probabilities(self, small_training_data) -> None:
+    def test_predict_proba_returns_valid_probabilities(
+        self, small_training_data
+    ) -> None:
         X, y = small_training_data
         model = LogisticRegressionPredictor()
         model.train(X, y)
@@ -62,7 +64,9 @@ class TestXGBoostPredictor:
         preds = model.predict(X)
         assert set(np.unique(preds)).issubset({0, 1})
 
-    def test_predict_proba_returns_valid_probabilities(self, small_training_data) -> None:
+    def test_predict_proba_returns_valid_probabilities(
+        self, small_training_data
+    ) -> None:
         X, y = small_training_data
         model = XGBoostPredictor()
         model.train(X, y)
