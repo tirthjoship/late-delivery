@@ -126,10 +126,38 @@ class Forecast:
         """Validate consistent lengths when confidence is provided."""
         n = len(self.point_forecast)
         if self.confidence_lower is not None and len(self.confidence_lower) != n:
-            raise ValueError(
-                "confidence_lower length must match point_forecast"
-            )
+            raise ValueError("confidence_lower length must match point_forecast")
         if self.confidence_upper is not None and len(self.confidence_upper) != n:
-            raise ValueError(
-                "confidence_upper length must match point_forecast"
-            )
+            raise ValueError("confidence_upper length must match point_forecast")
+
+
+@dataclass(frozen=True)
+class MetricsResult:
+    """Evaluation metrics for a trained model.
+
+    F1 is the primary metric — accuracy is misleading with 55/45 class split.
+    """
+
+    f1: float
+    precision: float
+    recall: float
+    auc_roc: float
+    confusion_matrix: tuple[tuple[int, ...], ...]
+
+
+@dataclass(frozen=True)
+class TrainingResult:
+    """Output of a model training run."""
+
+    model_name: str
+    metrics: MetricsResult
+    feature_importances: dict[str, float]
+
+
+@dataclass(frozen=True)
+class PredictionResult:
+    """Output of a single-order prediction with explanation."""
+
+    probability: float
+    risk_label: bool
+    explanation: dict[str, float]

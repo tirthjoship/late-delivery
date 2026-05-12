@@ -1,0 +1,38 @@
+name: Lint & Typecheck
+
+on:
+  push:
+    branches: [main, dev, "feature/**", "feat/**", "fix/**"]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  lint:
+    name: Lint (pre-commit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          pip install pre-commit
+          pip install black isort mypy ruff
+      - name: Run pre-commit
+        run: pre-commit run --all-files
+
+  typecheck:
+    name: Typecheck (mypy strict)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          pip install mypy pandas-stubs types-requests
+          pip install pandas scikit-learn xgboost hypothesis mlflow shap joblib
+      - name: Run mypy
+        run: mypy domain/ adapters/ application/ --strict

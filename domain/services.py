@@ -10,9 +10,7 @@ from .models import Order
 # Shipping modes identified in EDA (DataCo): First Class, Same Day, Second Class, Standard Class.
 # Per LOCAL_PROJECT_STORY.md: First Class (95.3% late), Second Class (76.6% late), Standard (38% late).
 # First Class and Second Class are HIGH-RISK, not Standard Class.
-HIGH_RISK_SHIPPING_MODES: frozenset[str] = frozenset(
-    {"First Class", "Second Class"}
-)
+HIGH_RISK_SHIPPING_MODES: frozenset[str] = frozenset({"First Class", "Second Class"})
 
 
 def is_high_risk_shipping_mode(shipping_mode: str) -> bool:
@@ -82,6 +80,36 @@ def baseline_late_delivery_risk_flag(
     """
     if is_high_risk_shipping_mode(order.shipping_mode):
         return True
-    if use_scheduled_days_threshold and order.days_for_shipment_scheduled > scheduled_days_threshold:
+    if (
+        use_scheduled_days_threshold
+        and order.days_for_shipment_scheduled > scheduled_days_threshold
+    ):
         return True
     return False
+
+
+def extract_features(order: Order) -> dict[str, float | str]:
+    """Extract ML features from an order using only pre-shipment data.
+
+    Returns a raw feature dict. Encoding (one-hot, scaling) is the
+    adapter's job. The label (late_delivery_risk) is NOT included —
+    it is extracted separately in the application layer to prevent leakage.
+    """
+    return {
+        "shipping_mode": order.shipping_mode,
+        "days_for_shipment_scheduled": order.days_for_shipment_scheduled,
+        "order_month": order.order_date.month,
+        "order_day_of_week": order.order_date.weekday(),
+        "order_region": order.order_region,
+        "benefit_per_order": order.benefit_per_order,
+        "sales_per_customer": order.sales_per_customer,
+        "order_profit_per_order": order.order_profit_per_order,
+        "item_count": len(order.items),
+        "total_quantity": sum(item.quantity for item in order.items),
+        "total_discount": sum(item.discount for item in order.items),
+        "avg_unit_price": (
+            sum(item.unit_price for item in order.items) / len(order.items)
+            if order.items
+            else 0.0
+        ),
+    }
