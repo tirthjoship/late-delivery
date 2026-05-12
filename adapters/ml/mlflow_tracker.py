@@ -22,7 +22,7 @@ class MLflowTracker:
     def __init__(
         self,
         experiment_name: str = "late-delivery-risk",
-        tracking_uri: str = "mlruns",
+        tracking_uri: str = "sqlite:///mlflow.db",
     ) -> None:
         self._experiment_name = experiment_name
         self._tracking_uri = tracking_uri
