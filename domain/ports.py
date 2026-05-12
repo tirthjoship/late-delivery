@@ -50,6 +50,10 @@ class ModelTrainerPort(Protocol):
         """Return class probability estimates for X."""
         ...
 
+    def get_params(self) -> dict[str, Any]:
+        """Return model hyperparameters for experiment tracking."""
+        ...
+
 
 class ExplainerPort(Protocol):
     """Port: explain model predictions."""
