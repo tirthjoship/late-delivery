@@ -97,4 +97,5 @@ class ShapExplainer:
         if isinstance(sv, list):
             result: np.ndarray = sv[1]  # positive class
             return result
-        return np.asarray(sv)
+        result_arr: np.ndarray = np.asarray(sv)
+        return result_arr
