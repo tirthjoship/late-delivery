@@ -33,6 +33,7 @@ env/
 # MLflow
 mlruns/
 mlartifacts/
+mlflow.db
 
 # macOS
 .DS_Store

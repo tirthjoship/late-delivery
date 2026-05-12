@@ -90,3 +90,22 @@ class TestSameInterface:
             assert hasattr(instance, "train")
             assert hasattr(instance, "predict")
             assert hasattr(instance, "predict_proba")
+
+    def test_both_have_get_params(self) -> None:
+        for cls in [LogisticRegressionPredictor, XGBoostPredictor]:
+            instance = cls()
+            params = instance.get_params()
+            assert isinstance(params, dict)
+            assert len(params) > 0
+
+    def test_logreg_get_params_contains_expected_keys(self) -> None:
+        model = LogisticRegressionPredictor(max_iter=500)
+        params = model.get_params()
+        assert params["max_iter"] == 500
+
+    def test_xgboost_get_params_contains_expected_keys(self) -> None:
+        model = XGBoostPredictor(max_depth=3, n_estimators=200, learning_rate=0.05)
+        params = model.get_params()
+        assert params["max_depth"] == 3
+        assert params["n_estimators"] == 200
+        assert params["learning_rate"] == 0.05

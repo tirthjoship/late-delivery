@@ -123,6 +123,62 @@ class TestTrainAndEvaluateUseCase:
         assert isinstance(result, TrainingResult)
 
 
+def test_execute_passes_custom_run_name(synthetic_orders):
+    """Verify run_name param is forwarded to tracker.start_run()."""
+    from unittest.mock import MagicMock
+
+    from adapters.ml.feature_encoder import FeatureEncoder
+    from adapters.ml.shap_explainer import ShapExplainer
+    from adapters.ml.sklearn_predictor import XGBoostPredictor
+    from application.use_cases import TrainAndEvaluateUseCase
+
+    mock_tracker = MagicMock()
+    repo = MagicMock()
+    repo.get_orders.return_value = synthetic_orders
+
+    use_case = TrainAndEvaluateUseCase(
+        data_repo=repo,
+        feature_encoder=FeatureEncoder(),
+        model=XGBoostPredictor(),
+        explainer_factory=lambda m, names: ShapExplainer(m.model, names),
+        tracker=mock_tracker,
+    )
+    use_case.execute(run_name="xgboost-shallow")
+    mock_tracker.start_run.assert_called_once_with(run_name="xgboost-shallow")
+
+
+def test_execute_logs_model_hyperparams(synthetic_orders):
+    """Verify model hyperparams are logged to tracker."""
+    from unittest.mock import MagicMock
+
+    from adapters.ml.feature_encoder import FeatureEncoder
+    from adapters.ml.shap_explainer import ShapExplainer
+    from adapters.ml.sklearn_predictor import XGBoostPredictor
+    from application.use_cases import TrainAndEvaluateUseCase
+
+    mock_tracker = MagicMock()
+    repo = MagicMock()
+    repo.get_orders.return_value = synthetic_orders
+
+    model = XGBoostPredictor(max_depth=3, n_estimators=200)
+    use_case = TrainAndEvaluateUseCase(
+        data_repo=repo,
+        feature_encoder=FeatureEncoder(),
+        model=model,
+        explainer_factory=lambda m, names: ShapExplainer(m.model, names),
+        tracker=mock_tracker,
+    )
+    use_case.execute()
+
+    # log_params is called twice: once for split params, once for hp_ params
+    all_calls = mock_tracker.log_params.call_args_list
+    assert len(all_calls) == 2
+    hp_params = all_calls[1][0][0]
+    assert "hp_max_depth" in hp_params
+    assert hp_params["hp_max_depth"] == "3"
+    assert hp_params["hp_n_estimators"] == "200"
+
+
 class TestEncoderFitOnTrainOnly:
     """CRITICAL: verify encoder is fit on training data only."""
 
