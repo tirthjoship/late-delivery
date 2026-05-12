@@ -35,6 +35,11 @@ class LogisticRegressionPredictor:
         result: np.ndarray = self._model.predict_proba(X)[:, 1]
         return result
 
+    def get_params(self) -> dict[str, object]:
+        """Return model hyperparameters."""
+        result: dict[str, object] = self._model.get_params()
+        return result
+
     @property
     def coef_(self) -> np.ndarray:
         result: np.ndarray = self._model.coef_
@@ -78,6 +83,11 @@ class XGBoostPredictor:
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         result: np.ndarray = self._model.predict_proba(X)[:, 1]
+        return result
+
+    def get_params(self) -> dict[str, object]:
+        """Return model hyperparameters."""
+        result: dict[str, object] = self._model.get_params()
         return result
 
     @property
