@@ -336,26 +336,46 @@ class TestClusteringFeatureProperties:
         """Clustering feature subset inherits extract_features leakage protection."""
         features = extract_features(order)
         clustering_keys = [
-            "days_for_shipment_scheduled", "order_month", "order_day_of_week",
-            "benefit_per_order", "sales_per_customer", "order_profit_per_order",
-            "item_count", "total_quantity", "total_discount", "avg_unit_price",
+            "days_for_shipment_scheduled",
+            "order_month",
+            "order_day_of_week",
+            "benefit_per_order",
+            "sales_per_customer",
+            "order_profit_per_order",
+            "item_count",
+            "total_quantity",
+            "total_discount",
+            "avg_unit_price",
             "shipping_mode",
         ]
-        clustering_features = {k: v for k, v in features.items() if k in clustering_keys}
+        clustering_features = {
+            k: v for k, v in features.items() if k in clustering_keys
+        }
         leakage_words = {"real", "delivery_status", "shipping_date"}
         for key in clustering_features:
             for word in leakage_words:
-                assert word not in key.lower(), f"Leakage keyword '{word}' in clustering key '{key}'"
+                assert (
+                    word not in key.lower()
+                ), f"Leakage keyword '{word}' in clustering key '{key}'"
 
     @given(order=order_strategy())
     def test_clustering_features_fixed_key_count(self, order: Order) -> None:
         """Clustering always uses 11 features (10 numeric + shipping_mode)."""
         features = extract_features(order)
         clustering_keys = [
-            "days_for_shipment_scheduled", "order_month", "order_day_of_week",
-            "benefit_per_order", "sales_per_customer", "order_profit_per_order",
-            "item_count", "total_quantity", "total_discount", "avg_unit_price",
+            "days_for_shipment_scheduled",
+            "order_month",
+            "order_day_of_week",
+            "benefit_per_order",
+            "sales_per_customer",
+            "order_profit_per_order",
+            "item_count",
+            "total_quantity",
+            "total_discount",
+            "avg_unit_price",
             "shipping_mode",
         ]
-        clustering_features = {k: v for k, v in features.items() if k in clustering_keys}
+        clustering_features = {
+            k: v for k, v in features.items() if k in clustering_keys
+        }
         assert len(clustering_features) == 11
