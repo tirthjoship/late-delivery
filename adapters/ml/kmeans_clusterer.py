@@ -35,19 +35,22 @@ class KMeansClusterer:
         """Assign cluster labels to feature matrix X."""
         if self._model is None:
             raise RuntimeError("KMeansClusterer is not fitted. Call fit() first.")
-        return self._model.predict(X)
+        result: np.ndarray = self._model.predict(X)
+        return result
 
     def get_centroids(self) -> np.ndarray:
         """Return cluster centroids (K x n_features)."""
         if self._model is None:
             raise RuntimeError("KMeansClusterer is not fitted. Call fit() first.")
-        return self._model.cluster_centers_
+        centers: np.ndarray = self._model.cluster_centers_
+        return centers
 
     def get_labels(self) -> np.ndarray:
         """Return cluster labels assigned during fit."""
         if self._model is None:
             raise RuntimeError("KMeansClusterer is not fitted. Call fit() first.")
-        return self._model.labels_
+        labels: np.ndarray = self._model.labels_
+        return labels
 
     def compute_silhouette(self, X: np.ndarray) -> float:
         """Compute silhouette score for current clustering."""
