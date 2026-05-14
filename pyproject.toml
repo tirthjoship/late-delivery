@@ -17,6 +17,8 @@ dependencies = [
     "hypothesis>=6.0.0",
     "pytest>=7.0.0",
     "loguru>=0.7.0",
+    "streamlit>=1.30.0",
+    "plotly>=5.18.0",
 ]
 
 [project.optional-dependencies]
@@ -69,6 +71,10 @@ module = [
     "joblib.*",
     "loguru",
     "loguru.*",
+    "streamlit",
+    "streamlit.*",
+    "plotly",
+    "plotly.*",
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
