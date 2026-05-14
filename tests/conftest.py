@@ -111,3 +111,28 @@ def synthetic_orders_distinctive_sales() -> tuple[list[Order], list[Order]]:
     train = [_make_order(i, "Standard Class", 3, 1, sales=1000.0) for i in range(50)]
     test = [_make_order(i + 50, "Standard Class", 3, 0, sales=0.0) for i in range(50)]
     return train, test
+
+
+@pytest.fixture
+def clustering_feature_dicts(synthetic_orders: list[Order]) -> list[dict]:
+    """Raw feature dicts from synthetic orders for clustering tests."""
+    from domain.services import extract_features
+
+    return [extract_features(o) for o in synthetic_orders]
+
+
+@pytest.fixture
+def clustering_numeric_keys() -> list[str]:
+    """Numeric feature keys used for clustering (excludes order_region)."""
+    return [
+        "days_for_shipment_scheduled",
+        "order_month",
+        "order_day_of_week",
+        "benefit_per_order",
+        "sales_per_customer",
+        "order_profit_per_order",
+        "item_count",
+        "total_quantity",
+        "total_discount",
+        "avg_unit_price",
+    ]
