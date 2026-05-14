@@ -105,3 +105,27 @@ class ExperimentTrackerPort(Protocol):
     def end_run(self) -> None:
         """Close the active experiment run."""
         ...
+
+
+class ClusteringPort(Protocol):
+    """Port: unsupervised clustering of orders into risk cohorts.
+
+    Implemented by adapters (e.g. KMeans, DBSCAN) to provide
+    clustering without domain depending on ML framework.
+    """
+
+    def fit(self, X: Any) -> None:
+        """Fit clustering model on feature matrix X."""
+        ...
+
+    def predict(self, X: Any) -> Any:
+        """Assign cluster labels to feature matrix X."""
+        ...
+
+    def get_centroids(self) -> Any:
+        """Return cluster centroids after fitting."""
+        ...
+
+    def get_labels(self) -> Any:
+        """Return cluster labels assigned during fit."""
+        ...
