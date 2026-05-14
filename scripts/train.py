@@ -113,21 +113,21 @@ def run_experiment(
     return use_case.execute(run_name=run_name)
 
 
-def print_result(result: TrainingResult) -> None:
-    """Print training result summary."""
+def log_result(result: TrainingResult) -> None:
+    """Log training result summary."""
     m = result.metrics
-    print(f"  F1:        {m.f1:.4f}")
-    print(f"  Precision: {m.precision:.4f}")
-    print(f"  Recall:    {m.recall:.4f}")
-    print(f"  AUC-ROC:   {m.auc_roc:.4f}")
-    print(f"  Confusion Matrix: {m.confusion_matrix}")
+    logger.info("  F1:        {:.4f}", m.f1)
+    logger.info("  Precision: {:.4f}", m.precision)
+    logger.info("  Recall:    {:.4f}", m.recall)
+    logger.info("  AUC-ROC:   {:.4f}", m.auc_roc)
+    logger.info("  Confusion Matrix: {}", m.confusion_matrix)
 
     top_features = sorted(
         result.feature_importances.items(), key=lambda x: abs(x[1]), reverse=True
     )[:5]
-    print("  Top 5 features (SHAP):")
+    logger.info("  Top 5 features (SHAP):")
     for name, importance in top_features:
-        print(f"    {name}: {importance:.4f}")
+        logger.info("    {}: {:.4f}", name, importance)
 
 
 def main() -> None:
@@ -143,17 +143,17 @@ def main() -> None:
     if args.sample:
         data_path = SAMPLE_PATH
         if not data_path.exists():
-            print(f"ERROR: Sample data not found at {data_path}")
-            print("Run: python scripts/generate_sample.py")
+            logger.error("Sample data not found at {}", data_path)
+            logger.error("Run: python scripts/generate_sample.py")
             raise SystemExit(1)
-        print(f"Using sample data: {data_path}")
+        logger.info("Using sample data: {}", data_path)
     else:
         data_path = FULL_PATH
         if not data_path.exists():
-            print(f"ERROR: Full dataset not found at {data_path}")
-            print("Download from Kaggle or use --sample for demo")
+            logger.error("Full dataset not found at {}", data_path)
+            logger.error("Download from Kaggle or use --sample for demo")
             raise SystemExit(1)
-        print(f"Using full dataset: {data_path}")
+        logger.info("Using full dataset: {}", data_path)
 
     # Select models
     if args.model == "all":
@@ -162,15 +162,15 @@ def main() -> None:
         key = args.model
         configs = [(key, MODEL_CONFIGS[key])]
 
-    print(f"Experiment: {args.experiment_name}")
-    print(f"Tracking:   {args.tracking_uri}")
-    print(f"Models:     {[c[0] for c in configs]}")
-    print("=" * 60)
+    logger.info("Experiment: {}", args.experiment_name)
+    logger.info("Tracking:   {}", args.tracking_uri)
+    logger.info("Models:     {}", [c[0] for c in configs])
+    logger.info("=" * 60)
 
     results: list[tuple[str, TrainingResult]] = []
 
     for config_name, (run_name, model) in configs:
-        print(f"\n--- {run_name} ---")
+        logger.info("--- {} ---", run_name)
         result = run_experiment(
             data_path=data_path,
             run_name=run_name,
@@ -178,26 +178,38 @@ def main() -> None:
             tracking_uri=args.tracking_uri,
             experiment_name=args.experiment_name,
         )
-        print_result(result)
+        log_result(result)
         results.append((run_name, result))
         logger.info("Training complete for {}", run_name)
 
     # Summary table
     if len(results) > 1:
-        print("\n" + "=" * 60)
-        print("COMPARISON SUMMARY")
-        print(f"{'Run':<25} {'F1':>8} {'Precision':>10} {'Recall':>8} {'AUC-ROC':>8}")
-        print("-" * 60)
+        logger.info("=" * 60)
+        logger.info("COMPARISON SUMMARY")
+        logger.info(
+            "{:<25} {:>8} {:>10} {:>8} {:>8}",
+            "Run",
+            "F1",
+            "Precision",
+            "Recall",
+            "AUC-ROC",
+        )
+        logger.info("-" * 60)
         for run_name, result in results:
             m = result.metrics
-            print(
-                f"{run_name:<25} {m.f1:>8.4f} {m.precision:>10.4f} {m.recall:>8.4f} {m.auc_roc:>8.4f}"
+            logger.info(
+                "{:<25} {:>8.4f} {:>10.4f} {:>8.4f} {:>8.4f}",
+                run_name,
+                m.f1,
+                m.precision,
+                m.recall,
+                m.auc_roc,
             )
-        print("=" * 60)
+        logger.info("=" * 60)
 
     best = max(results, key=lambda x: x[1].metrics.f1)
-    print(f"\nBest model by F1: {best[0]} (F1={best[1].metrics.f1:.4f})")
-    print(f"\nView experiments: mlflow ui --backend-store-uri {args.tracking_uri}")
+    logger.success("Best model by F1: {} (F1={:.4f})", best[0], best[1].metrics.f1)
+    logger.info("View experiments: mlflow ui --backend-store-uri {}", args.tracking_uri)
 
 
 if __name__ == "__main__":
