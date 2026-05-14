@@ -22,7 +22,9 @@ def render_model_tab(pipeline: dict[str, Any]) -> None:
         pipeline: Dict of artifacts returned by load_pipeline().
     """
     st.header("Model Performance Comparison")
-    st.caption("LogisticRegression (interpretable baseline) vs XGBoost (production model)")
+    st.caption(
+        "LogisticRegression (interpretable baseline) vs XGBoost (production model)"
+    )
 
     logreg_result = pipeline["logreg_result"]
     xgb_result = pipeline["xgb_result"]
@@ -49,7 +51,9 @@ def render_model_tab(pipeline: dict[str, Any]) -> None:
         auc_delta = f"{xgb_result.metrics.auc_roc - logreg_result.metrics.auc_roc:+.4f}"
         c1.metric("F1 Score", f"{m.f1:.4f}", delta=f1_delta)
         c2.metric("AUC-ROC", f"{m.auc_roc:.4f}", delta=auc_delta)
-        prec_delta = f"{xgb_result.metrics.precision - logreg_result.metrics.precision:+.4f}"
+        prec_delta = (
+            f"{xgb_result.metrics.precision - logreg_result.metrics.precision:+.4f}"
+        )
         rec_delta = f"{xgb_result.metrics.recall - logreg_result.metrics.recall:+.4f}"
         c3, c4 = st.columns(2)
         c3.metric("Precision", f"{m.precision:.4f}", delta=prec_delta)
