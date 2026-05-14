@@ -93,16 +93,13 @@ Five hard stops — see `AGENTS.md` for full details:
 - Agent Development Kit — 4 agents, 2 skills, guardrail hooks
 - CLAUDE.md + AGENTS.md — project orientation and coding standards
 - PR and issue templates
+- Streamlit dashboard with 4 tabs (Predict, Model Performance, Cohorts, Dataset)
+- Phase 4.5 K-Means clustering pipeline (RiskCohort, ClusteringPort, FitClusters, ProfileClusters)
+- Plotly visualization adapter with 8 chart functions
 
 **Skeleton (1-line stubs):**
 - `adapters/ml/pytorch_predictor.py` — neural net adapter
-- `adapters/visualization/plotly_charts.py` — charting adapter
-- `adapters/data/database_repository.py` — DB adapter
-- `adapters/data/api_client.py` — API adapter
 
 **Planned:**
-- Streamlit dashboard (Phase 5)
-- SHAP dependence/cohort plots (Phase 5)
-- K-Means clustering (Phase 4.5)
-- Expanded CI (coverage gate, performance regression)
-- Observability (structured logging, tracing)
+
+**All phases complete.** See Phase Status above for full inventory.

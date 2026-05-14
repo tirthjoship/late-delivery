@@ -227,3 +227,124 @@ class TestPredictSingleOrderUseCase:
         assert 0.0 <= result.probability <= 1.0
         assert isinstance(result.risk_label, bool)
         assert len(result.explanation) > 0
+
+
+class TestFitClustersUseCase:
+    """Tests for FitClustersUseCase."""
+
+    def test_returns_cluster_selection_result(self, synthetic_orders) -> None:
+        from adapters.ml.feature_encoder import FeatureEncoder
+        from application.use_cases import ClusterSelectionResult, FitClustersUseCase
+
+        repo = FakeSalesDataRepository(synthetic_orders)
+        encoder = FeatureEncoder()
+
+        use_case = FitClustersUseCase(data_repo=repo, feature_encoder=encoder)
+        result = use_case.execute(k_range=range(2, 6))
+        assert isinstance(result, ClusterSelectionResult)
+        assert 2 <= result.optimal_k <= 5
+        assert len(result.elbow_data) == 4  # k=2,3,4,5
+        assert len(result.silhouette_scores) == 4
+
+    def test_elbow_data_has_decreasing_inertia(self, synthetic_orders) -> None:
+        from adapters.ml.feature_encoder import FeatureEncoder
+        from application.use_cases import FitClustersUseCase
+
+        repo = FakeSalesDataRepository(synthetic_orders)
+        encoder = FeatureEncoder()
+
+        use_case = FitClustersUseCase(data_repo=repo, feature_encoder=encoder)
+        result = use_case.execute(k_range=range(2, 6))
+        inertias = list(result.elbow_data.values())
+        for i in range(1, len(inertias)):
+            assert (
+                inertias[i] <= inertias[i - 1]
+            )  # inertia decreases with more clusters
+
+    def test_silhouette_scores_in_valid_range(self, synthetic_orders) -> None:
+        from adapters.ml.feature_encoder import FeatureEncoder
+        from application.use_cases import FitClustersUseCase
+
+        repo = FakeSalesDataRepository(synthetic_orders)
+        encoder = FeatureEncoder()
+
+        use_case = FitClustersUseCase(data_repo=repo, feature_encoder=encoder)
+        result = use_case.execute(k_range=range(2, 6))
+        for score in result.silhouette_scores.values():
+            assert -1.0 <= score <= 1.0
+
+
+class TestProfileClustersUseCase:
+    """Tests for ProfileClustersUseCase."""
+
+    def test_returns_risk_cohorts(self, synthetic_orders) -> None:
+        from adapters.ml.feature_encoder import FeatureEncoder
+        from adapters.ml.kmeans_clusterer import KMeansClusterer
+        from application.use_cases import ProfileClustersUseCase
+        from domain.models import RiskCohort
+
+        repo = FakeSalesDataRepository(synthetic_orders)
+        encoder = FeatureEncoder()
+        clusterer = KMeansClusterer(n_clusters=3)
+
+        use_case = ProfileClustersUseCase(
+            data_repo=repo,
+            feature_encoder=encoder,
+            clusterer=clusterer,
+        )
+        cohorts = use_case.execute()
+        assert len(cohorts) == 3
+        assert all(isinstance(c, RiskCohort) for c in cohorts)
+
+    def test_cohort_sizes_sum_to_total(self, synthetic_orders) -> None:
+        from adapters.ml.feature_encoder import FeatureEncoder
+        from adapters.ml.kmeans_clusterer import KMeansClusterer
+        from application.use_cases import ProfileClustersUseCase
+
+        repo = FakeSalesDataRepository(synthetic_orders)
+        encoder = FeatureEncoder()
+        clusterer = KMeansClusterer(n_clusters=3)
+
+        use_case = ProfileClustersUseCase(
+            data_repo=repo,
+            feature_encoder=encoder,
+            clusterer=clusterer,
+        )
+        cohorts = use_case.execute()
+        assert sum(c.size for c in cohorts) == len(synthetic_orders)
+
+    def test_cohort_late_rates_valid(self, synthetic_orders) -> None:
+        from adapters.ml.feature_encoder import FeatureEncoder
+        from adapters.ml.kmeans_clusterer import KMeansClusterer
+        from application.use_cases import ProfileClustersUseCase
+
+        repo = FakeSalesDataRepository(synthetic_orders)
+        encoder = FeatureEncoder()
+        clusterer = KMeansClusterer(n_clusters=3)
+
+        use_case = ProfileClustersUseCase(
+            data_repo=repo,
+            feature_encoder=encoder,
+            clusterer=clusterer,
+        )
+        cohorts = use_case.execute()
+        for c in cohorts:
+            assert 0.0 <= c.late_rate <= 1.0
+
+    def test_cohort_region_distribution_sums_to_one(self, synthetic_orders) -> None:
+        from adapters.ml.feature_encoder import FeatureEncoder
+        from adapters.ml.kmeans_clusterer import KMeansClusterer
+        from application.use_cases import ProfileClustersUseCase
+
+        repo = FakeSalesDataRepository(synthetic_orders)
+        encoder = FeatureEncoder()
+        clusterer = KMeansClusterer(n_clusters=3)
+
+        use_case = ProfileClustersUseCase(
+            data_repo=repo,
+            feature_encoder=encoder,
+            clusterer=clusterer,
+        )
+        cohorts = use_case.execute()
+        for c in cohorts:
+            assert abs(sum(c.region_distribution.values()) - 1.0) < 0.01

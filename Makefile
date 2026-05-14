@@ -1,4 +1,4 @@
-.PHONY: test test-cov lint typecheck setup check
+.PHONY: test test-cov lint typecheck setup check app
 
 test:
 	pytest tests/ -v --tb=short
@@ -18,3 +18,6 @@ setup:
 	pre-commit install
 
 check: lint typecheck test-cov
+
+app:
+	streamlit run app/streamlit_app.py
