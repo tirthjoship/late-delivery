@@ -161,3 +161,21 @@ class PredictionResult:
     probability: float
     risk_label: bool
     explanation: dict[str, float]
+
+
+@dataclass(frozen=True)
+class RiskCohort:
+    """A cluster of orders sharing similar delivery risk characteristics.
+
+    Created by K-Means clustering on order features. Labels assigned
+    post-hoc based on late delivery rate and dominant shipping mode.
+    """
+
+    cluster_id: int
+    label: str
+    size: int
+    late_rate: float
+    dominant_shipping_mode: str
+    avg_scheduled_days: float
+    feature_centroid: dict[str, float]
+    region_distribution: dict[str, float]

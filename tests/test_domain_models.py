@@ -368,3 +368,63 @@ class TestPredictionResult:
         result = PredictionResult(probability=0.87, risk_label=True, explanation={})
         with pytest.raises(AttributeError):
             result.probability = 0.50  # type: ignore
+
+
+class TestRiskCohort:
+    """Tests for RiskCohort value object."""
+
+    def test_risk_cohort_creation(self) -> None:
+        from domain.models import RiskCohort
+
+        cohort = RiskCohort(
+            cluster_id=0,
+            label="High-Risk Express",
+            size=500,
+            late_rate=0.92,
+            dominant_shipping_mode="First Class",
+            avg_scheduled_days=2.5,
+            feature_centroid={
+                "days_for_shipment_scheduled": 2.5,
+                "benefit_per_order": 120.0,
+            },
+            region_distribution={"North America": 0.45, "Europe": 0.30, "Asia": 0.25},
+        )
+        assert cohort.cluster_id == 0
+        assert cohort.label == "High-Risk Express"
+        assert cohort.size == 500
+        assert cohort.late_rate == 0.92
+        assert cohort.dominant_shipping_mode == "First Class"
+        assert cohort.avg_scheduled_days == 2.5
+        assert cohort.feature_centroid["benefit_per_order"] == 120.0
+        assert cohort.region_distribution["North America"] == 0.45
+
+    def test_risk_cohort_is_frozen(self) -> None:
+        from domain.models import RiskCohort
+
+        cohort = RiskCohort(
+            cluster_id=0,
+            label="Test",
+            size=100,
+            late_rate=0.5,
+            dominant_shipping_mode="Standard Class",
+            avg_scheduled_days=3.0,
+            feature_centroid={},
+            region_distribution={},
+        )
+        with pytest.raises(AttributeError):
+            cohort.late_rate = 0.99  # type: ignore
+
+    def test_risk_cohort_late_rate_range(self) -> None:
+        from domain.models import RiskCohort
+
+        cohort = RiskCohort(
+            cluster_id=1,
+            label="Low-Risk Standard",
+            size=200,
+            late_rate=0.0,
+            dominant_shipping_mode="Same Day",
+            avg_scheduled_days=1.0,
+            feature_centroid={},
+            region_distribution={},
+        )
+        assert 0.0 <= cohort.late_rate <= 1.0
