@@ -15,7 +15,6 @@ Or:
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import streamlit as st
 from sklearn.decomposition import PCA
 
