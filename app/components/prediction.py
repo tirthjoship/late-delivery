@@ -64,7 +64,9 @@ def render_prediction_tab(pipeline: dict[str, Any]) -> None:
         pipeline: Dict of artifacts returned by load_pipeline().
     """
     st.header("Predict Late Delivery Risk for a Single Order")
-    st.caption("Fill in order details and click **Predict Risk** to get a real-time forecast.")
+    st.caption(
+        "Fill in order details and click **Predict Risk** to get a real-time forecast."
+    )
 
     left_col, right_col = st.columns([1, 1])
 
@@ -110,7 +112,9 @@ def render_prediction_tab(pipeline: dict[str, Any]) -> None:
             step=5.0,
         )
 
-        predict_clicked = st.button("Predict Risk", type="primary", use_container_width=True)
+        predict_clicked = st.button(
+            "Predict Risk", type="primary", use_container_width=True
+        )
 
     with right_col:
         if predict_clicked:
@@ -141,24 +145,36 @@ def render_prediction_tab(pipeline: dict[str, Any]) -> None:
 
             # Risk label badge
             if result.risk_label:
-                st.error(f"LATE DELIVERY PREDICTED ({result.probability:.1%} probability)")
+                st.error(
+                    f"LATE DELIVERY PREDICTED ({result.probability:.1%} probability)"
+                )
             else:
-                st.success(f"ON-TIME DELIVERY PREDICTED ({result.probability:.1%} probability)")
+                st.success(
+                    f"ON-TIME DELIVERY PREDICTED ({result.probability:.1%} probability)"
+                )
 
             # SHAP waterfall
             st.subheader("What Drove This Prediction?")
             local_result = explainer.explain_local(
                 encoder.transform(
-                    [__import__("domain.services", fromlist=["extract_features"]).extract_features(order)]
+                    [
+                        __import__(
+                            "domain.services", fromlist=["extract_features"]
+                        ).extract_features(order)
+                    ]
                 ).values,
                 index=0,
             )
-            waterfall_fig = shap_waterfall(local_result.shap_values, local_result.expected_value)
+            waterfall_fig = shap_waterfall(
+                local_result.shap_values, local_result.expected_value
+            )
             st.plotly_chart(waterfall_fig, use_container_width=True)
 
             # Top 3 contributing factors
             sorted_shap = sorted(
-                local_result.shap_values.items(), key=lambda kv: abs(kv[1]), reverse=True
+                local_result.shap_values.items(),
+                key=lambda kv: abs(kv[1]),
+                reverse=True,
             )
             st.subheader("Top 3 Contributing Factors")
             for feature, value in sorted_shap[:3]:
