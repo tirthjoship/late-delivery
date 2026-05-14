@@ -11,6 +11,7 @@ from collections.abc import Callable
 from typing import Any
 
 import numpy as np
+from loguru import logger
 from sklearn.model_selection import train_test_split
 
 from adapters.ml.evaluation import compute_metrics
@@ -50,6 +51,7 @@ class TrainAndEvaluateUseCase:
         """Run full training pipeline and return results."""
         # 1. Load orders
         orders = self._data_repo.get_orders()
+        logger.info("Loaded {} orders from data repository", len(orders))
 
         # 2. Extract features (domain) — label kept separate
         raw_features = [extract_features(o) for o in orders]
@@ -63,6 +65,7 @@ class TrainAndEvaluateUseCase:
             random_state=random_state,
             stratify=labels,
         )
+        logger.info("Split: {} train / {} test (stratified)", len(raw_train), len(raw_test))
 
         # 4. Encode — fit on train ONLY
         X_train = self._encoder.fit_transform(raw_train)
@@ -89,11 +92,14 @@ class TrainAndEvaluateUseCase:
 
         # 6. Train
         self._model.train(X_train.values, y_train)
+        logger.info("Trained {}", model_name)
 
         # 7. Evaluate
         y_pred = self._model.predict(X_test.values)
         y_proba = self._model.predict_proba(X_test.values)
         metrics = compute_metrics(y_test, y_pred, y_proba)
+        logger.info("Metrics — F1: {:.4f} | Precision: {:.4f} | Recall: {:.4f} | AUC: {:.4f}",
+                     metrics.f1, metrics.precision, metrics.recall, metrics.auc_roc)
 
         # 8. Log metrics
         self._tracker.log_metrics(
@@ -150,6 +156,7 @@ class PredictSingleOrderUseCase:
 
         # 3. Predict
         probability = float(self._model.predict_proba(X.values)[0])
+        logger.debug("Prediction: probability={:.4f}, risk_label={}", probability, probability >= self._threshold)
 
         # 4. Explain
         local_result = self._explainer.explain_local(X.values, index=0)
