@@ -193,6 +193,22 @@ make check   # lint + typecheck + test with 90% coverage gate
 make test     # tests only
 ```
 
+## Dashboard
+
+Interactive Streamlit dashboard with 4 tabs:
+
+```bash
+make app
+# Opens at http://localhost:8501
+```
+
+- **Predict & Explain** — Enter order details, get risk score + SHAP explanation
+- **Model Performance** — Side-by-side LogReg vs XGBoost metrics + SHAP importance
+- **Risk Cohorts** — K-Means cluster scatter + cohort profile cards
+- **Dataset** — Key statistics + shipping mode + region breakdowns
+
+Models train on the 1000-row sample CSV at startup (~3 seconds, cached).
+
 ## Quality
 
 - **110+ tests** at 90% coverage (90% gate enforced in CI)
