@@ -45,7 +45,9 @@ def render_cohorts_tab(pipeline: dict[str, Any]) -> None:
 
     with scatter_col:
         st.subheader("PCA Cluster Scatter")
-        scatter_fig = cluster_scatter_2d(X_pca, cluster_labels, cohort_labels=cohort_labels)
+        scatter_fig = cluster_scatter_2d(
+            X_pca, cluster_labels, cohort_labels=cohort_labels
+        )
         st.plotly_chart(scatter_fig, use_container_width=True)
 
     with cards_col:
@@ -62,7 +64,9 @@ def render_cohorts_tab(pipeline: dict[str, Any]) -> None:
                 c1.metric("Late Rate", f"{cohort.late_rate:.1%}")
                 c2.metric("Avg Scheduled Days", f"{cohort.avg_scheduled_days:.1f}")
 
-                st.markdown(f"**Dominant Shipping Mode:** {cohort.dominant_shipping_mode}")
+                st.markdown(
+                    f"**Dominant Shipping Mode:** {cohort.dominant_shipping_mode}"
+                )
 
                 # Top regions (up to 3)
                 if cohort.region_distribution:
