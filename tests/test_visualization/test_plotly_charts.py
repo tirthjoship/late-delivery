@@ -5,7 +5,6 @@ All functions must return go.Figure. Input data uses minimal synthetic fixtures.
 
 import numpy as np
 import plotly.graph_objects as go
-import pytest
 
 from adapters.visualization.plotly_charts import (
     cluster_scatter_2d,
@@ -111,7 +110,9 @@ class TestShapDependenceScatter:
         rng = np.random.default_rng(42)
         feature_values = rng.uniform(1, 7, 50).tolist()
         shap_vals = rng.uniform(-0.5, 0.5, 50).tolist()
-        fig = shap_dependence_scatter("days_for_shipment_scheduled", feature_values, shap_vals)
+        fig = shap_dependence_scatter(
+            "days_for_shipment_scheduled", feature_values, shap_vals
+        )
         assert isinstance(fig, go.Figure)
 
     def test_small_input(self) -> None:
