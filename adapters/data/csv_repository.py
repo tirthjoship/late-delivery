@@ -249,7 +249,11 @@ class DataCoCSVRepository:
                     late_delivery_risk=late if late is not None else None,
                 )
             )
-        logger.info("Parsed {} orders with {} total items", len(self._orders), sum(len(o.items) for o in self._orders))
+        logger.info(
+            "Parsed {} orders with {} total items",
+            len(self._orders),
+            sum(len(o.items) for o in self._orders),
+        )
         return self._orders
 
     def get_products(self) -> list[Product]:
