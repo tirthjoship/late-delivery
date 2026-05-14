@@ -8,6 +8,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from loguru import logger
+
 from domain.exceptions import DomainError
 from domain.models import Order, OrderItem, Product
 
@@ -142,6 +144,8 @@ class DataCoCSVRepository:
                 f"Failed to read CSV file {self._path}: {e}"
             ) from e
 
+        logger.info("Loaded CSV: {} rows from {}", len(df), self._path)
+
         # Validate required columns exist (before dropping leakage columns)
         missing_cols = [c for c in REQUIRED_ORDER_COLUMNS if c not in df.columns]
         if missing_cols:
@@ -153,6 +157,7 @@ class DataCoCSVRepository:
         to_drop = [c for c in LEAKAGE_COLUMNS if c in df.columns]
         if self._drop_leakage and to_drop:
             df = df.drop(columns=to_drop)
+            logger.info("Dropped leakage columns: {}", to_drop)
 
         # Parse order date once
         date_col = "order date (DateOrders)"
@@ -244,6 +249,7 @@ class DataCoCSVRepository:
                     late_delivery_risk=late if late is not None else None,
                 )
             )
+        logger.info("Parsed {} orders with {} total items", len(self._orders), sum(len(o.items) for o in self._orders))
         return self._orders
 
     def get_products(self) -> list[Product]:
