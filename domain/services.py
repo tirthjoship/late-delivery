@@ -5,7 +5,7 @@ shipping modes and rule-based baseline (no leakage features).
 Pure Python only — no pandas, numpy, or ML libraries.
 """
 
-from .models import Order
+from .models import Order, RiskCohort
 
 # Shipping modes identified in EDA (DataCo): First Class, Same Day, Second Class, Standard Class.
 # Per LOCAL_PROJECT_STORY.md: First Class (95.3% late), Second Class (76.6% late), Standard (38% late).
@@ -113,3 +113,25 @@ def extract_features(order: Order) -> dict[str, float | str]:
             else 0.0
         ),
     }
+
+
+def validate_cohort_separation(cohorts: list[RiskCohort]) -> bool:
+    """Check that cohorts have meaningfully different late delivery rates.
+
+    Requires at least 2 cohorts with a >5 percentage point gap between
+    the highest and lowest late_rate. A single cohort or cohorts with
+    similar late rates indicate K-Means did not find useful segmentation.
+
+    Args:
+        cohorts: List of RiskCohort objects from clustering.
+
+    Returns:
+        True if cohorts are meaningfully separated, False otherwise.
+    """
+    if len(cohorts) < 2:
+        return False
+    rates = [c.late_rate for c in cohorts]
+    gap = max(rates) - min(rates)
+    # Round to 2 decimals (100ths of a percent) to avoid floating-point
+    # precision artifacts, then check if strictly > 5pp
+    return round(gap, 2) > 0.05
