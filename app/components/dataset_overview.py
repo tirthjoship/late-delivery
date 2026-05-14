@@ -11,7 +11,10 @@ from typing import Any
 
 import streamlit as st
 
-from adapters.visualization.plotly_charts import late_rate_by_region_bar, shipping_mode_bar
+from adapters.visualization.plotly_charts import (
+    late_rate_by_region_bar,
+    shipping_mode_bar,
+)
 from domain.models import Order
 
 
@@ -34,9 +37,7 @@ def _compute_late_rates_by_mode(orders: list[Order]) -> dict[str, float]:
             late_counts[mode] += 1
 
     return {
-        mode: late_counts[mode] / counts[mode]
-        for mode in counts
-        if counts[mode] > 0
+        mode: late_counts[mode] / counts[mode] for mode in counts if counts[mode] > 0
     }
 
 
@@ -72,7 +73,9 @@ def render_dataset_tab(pipeline: dict[str, Any]) -> None:
         pipeline: Dict of artifacts returned by load_pipeline().
     """
     st.header("Dataset Overview")
-    st.caption("DataCo Supply Chain sample — summary statistics and delivery risk distributions.")
+    st.caption(
+        "DataCo Supply Chain sample — summary statistics and delivery risk distributions."
+    )
 
     orders = pipeline["orders"]
 
