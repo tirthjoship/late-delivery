@@ -386,14 +386,24 @@ class TestValidateCohortSeparation:
 
         cohorts = [
             RiskCohort(
-                cluster_id=0, label="High", size=100, late_rate=0.90,
-                dominant_shipping_mode="First Class", avg_scheduled_days=2.0,
-                feature_centroid={}, region_distribution={},
+                cluster_id=0,
+                label="High",
+                size=100,
+                late_rate=0.90,
+                dominant_shipping_mode="First Class",
+                avg_scheduled_days=2.0,
+                feature_centroid={},
+                region_distribution={},
             ),
             RiskCohort(
-                cluster_id=1, label="Low", size=200, late_rate=0.30,
-                dominant_shipping_mode="Standard Class", avg_scheduled_days=4.0,
-                feature_centroid={}, region_distribution={},
+                cluster_id=1,
+                label="Low",
+                size=200,
+                late_rate=0.30,
+                dominant_shipping_mode="Standard Class",
+                avg_scheduled_days=4.0,
+                feature_centroid={},
+                region_distribution={},
             ),
         ]
         assert validate_cohort_separation(cohorts) is True
@@ -404,14 +414,24 @@ class TestValidateCohortSeparation:
 
         cohorts = [
             RiskCohort(
-                cluster_id=0, label="A", size=100, late_rate=0.55,
-                dominant_shipping_mode="Standard Class", avg_scheduled_days=3.0,
-                feature_centroid={}, region_distribution={},
+                cluster_id=0,
+                label="A",
+                size=100,
+                late_rate=0.55,
+                dominant_shipping_mode="Standard Class",
+                avg_scheduled_days=3.0,
+                feature_centroid={},
+                region_distribution={},
             ),
             RiskCohort(
-                cluster_id=1, label="B", size=100, late_rate=0.56,
-                dominant_shipping_mode="Standard Class", avg_scheduled_days=3.1,
-                feature_centroid={}, region_distribution={},
+                cluster_id=1,
+                label="B",
+                size=100,
+                late_rate=0.56,
+                dominant_shipping_mode="Standard Class",
+                avg_scheduled_days=3.1,
+                feature_centroid={},
+                region_distribution={},
             ),
         ]
         assert validate_cohort_separation(cohorts) is False
@@ -422,9 +442,14 @@ class TestValidateCohortSeparation:
 
         cohorts = [
             RiskCohort(
-                cluster_id=0, label="Only", size=500, late_rate=0.55,
-                dominant_shipping_mode="Standard Class", avg_scheduled_days=3.0,
-                feature_centroid={}, region_distribution={},
+                cluster_id=0,
+                label="Only",
+                size=500,
+                late_rate=0.55,
+                dominant_shipping_mode="Standard Class",
+                avg_scheduled_days=3.0,
+                feature_centroid={},
+                region_distribution={},
             ),
         ]
         assert validate_cohort_separation(cohorts) is False
@@ -435,14 +460,24 @@ class TestValidateCohortSeparation:
 
         cohorts = [
             RiskCohort(
-                cluster_id=0, label="A", size=100, late_rate=0.50,
-                dominant_shipping_mode="Standard Class", avg_scheduled_days=3.0,
-                feature_centroid={}, region_distribution={},
+                cluster_id=0,
+                label="A",
+                size=100,
+                late_rate=0.50,
+                dominant_shipping_mode="Standard Class",
+                avg_scheduled_days=3.0,
+                feature_centroid={},
+                region_distribution={},
             ),
             RiskCohort(
-                cluster_id=1, label="B", size=100, late_rate=0.55,
-                dominant_shipping_mode="Standard Class", avg_scheduled_days=3.0,
-                feature_centroid={}, region_distribution={},
+                cluster_id=1,
+                label="B",
+                size=100,
+                late_rate=0.55,
+                dominant_shipping_mode="Standard Class",
+                avg_scheduled_days=3.0,
+                feature_centroid={},
+                region_distribution={},
             ),
         ]
         assert validate_cohort_separation(cohorts) is False  # need >5pp, not >=5pp

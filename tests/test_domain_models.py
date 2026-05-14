@@ -383,7 +383,10 @@ class TestRiskCohort:
             late_rate=0.92,
             dominant_shipping_mode="First Class",
             avg_scheduled_days=2.5,
-            feature_centroid={"days_for_shipment_scheduled": 2.5, "benefit_per_order": 120.0},
+            feature_centroid={
+                "days_for_shipment_scheduled": 2.5,
+                "benefit_per_order": 120.0,
+            },
             region_distribution={"North America": 0.45, "Europe": 0.30, "Asia": 0.25},
         )
         assert cohort.cluster_id == 0
