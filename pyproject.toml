@@ -16,6 +16,7 @@ dependencies = [
     "shap>=0.44.0",
     "hypothesis>=6.0.0",
     "pytest>=7.0.0",
+    "loguru>=0.7.0",
 ]
 
 [project.optional-dependencies]
@@ -63,6 +64,8 @@ module = [
     "mlflow.*",
     "joblib",
     "joblib.*",
+    "loguru",
+    "loguru.*",
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
