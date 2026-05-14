@@ -10,6 +10,7 @@ from typing import Any
 
 import joblib
 import mlflow
+from loguru import logger
 from mlflow.tracking import MlflowClient
 
 
@@ -34,6 +35,9 @@ class MLflowTracker:
     def start_run(self, run_name: str) -> None:
         self._run = mlflow.start_run(run_name=run_name)
         self._run_id = self._run.info.run_id
+        logger.info(
+            "MLflow run started: {} (experiment: {})", run_name, self._experiment_name
+        )
 
     def log_params(self, params: dict[str, Any]) -> None:
         mlflow.log_params(params)
@@ -66,6 +70,7 @@ class MLflowTracker:
         mlflow.register_model(model_uri, model_name)
 
     def end_run(self) -> None:
+        logger.info("MLflow run ended: {}", self._run_id)
         mlflow.end_run()
         self._run = None
 

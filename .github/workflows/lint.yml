@@ -33,6 +33,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install mypy pandas-stubs types-requests
-          pip install pandas scikit-learn xgboost hypothesis mlflow shap joblib
+          pip install .
       - name: Run mypy
         run: mypy domain/ adapters/ application/ --strict
