@@ -375,3 +375,74 @@ class TestExtractFeatures:
         assert isinstance(features["days_for_shipment_scheduled"], int)
         assert isinstance(features["order_month"], int)
         assert isinstance(features["benefit_per_order"], float)
+
+
+class TestValidateCohortSeparation:
+    """Tests for validate_cohort_separation function."""
+
+    def test_well_separated_cohorts_pass(self) -> None:
+        from domain.models import RiskCohort
+        from domain.services import validate_cohort_separation
+
+        cohorts = [
+            RiskCohort(
+                cluster_id=0, label="High", size=100, late_rate=0.90,
+                dominant_shipping_mode="First Class", avg_scheduled_days=2.0,
+                feature_centroid={}, region_distribution={},
+            ),
+            RiskCohort(
+                cluster_id=1, label="Low", size=200, late_rate=0.30,
+                dominant_shipping_mode="Standard Class", avg_scheduled_days=4.0,
+                feature_centroid={}, region_distribution={},
+            ),
+        ]
+        assert validate_cohort_separation(cohorts) is True
+
+    def test_identical_cohorts_fail(self) -> None:
+        from domain.models import RiskCohort
+        from domain.services import validate_cohort_separation
+
+        cohorts = [
+            RiskCohort(
+                cluster_id=0, label="A", size=100, late_rate=0.55,
+                dominant_shipping_mode="Standard Class", avg_scheduled_days=3.0,
+                feature_centroid={}, region_distribution={},
+            ),
+            RiskCohort(
+                cluster_id=1, label="B", size=100, late_rate=0.56,
+                dominant_shipping_mode="Standard Class", avg_scheduled_days=3.1,
+                feature_centroid={}, region_distribution={},
+            ),
+        ]
+        assert validate_cohort_separation(cohorts) is False
+
+    def test_single_cohort_fails(self) -> None:
+        from domain.models import RiskCohort
+        from domain.services import validate_cohort_separation
+
+        cohorts = [
+            RiskCohort(
+                cluster_id=0, label="Only", size=500, late_rate=0.55,
+                dominant_shipping_mode="Standard Class", avg_scheduled_days=3.0,
+                feature_centroid={}, region_distribution={},
+            ),
+        ]
+        assert validate_cohort_separation(cohorts) is False
+
+    def test_edge_case_exactly_5pp_gap(self) -> None:
+        from domain.models import RiskCohort
+        from domain.services import validate_cohort_separation
+
+        cohorts = [
+            RiskCohort(
+                cluster_id=0, label="A", size=100, late_rate=0.50,
+                dominant_shipping_mode="Standard Class", avg_scheduled_days=3.0,
+                feature_centroid={}, region_distribution={},
+            ),
+            RiskCohort(
+                cluster_id=1, label="B", size=100, late_rate=0.55,
+                dominant_shipping_mode="Standard Class", avg_scheduled_days=3.0,
+                feature_centroid={}, region_distribution={},
+            ),
+        ]
+        assert validate_cohort_separation(cohorts) is False  # need >5pp, not >=5pp
