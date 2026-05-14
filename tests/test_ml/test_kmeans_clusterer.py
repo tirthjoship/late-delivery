@@ -35,7 +35,9 @@ class TestKMeansClusterer:
         assert len(labels) == 50
         assert set(np.unique(labels)).issubset({0, 1, 2})
 
-    def test_get_labels_matches_predict(self, synthetic_feature_matrix: np.ndarray) -> None:
+    def test_get_labels_matches_predict(
+        self, synthetic_feature_matrix: np.ndarray
+    ) -> None:
         clusterer = KMeansClusterer(n_clusters=3)
         clusterer.fit(synthetic_feature_matrix)
         fit_labels = clusterer.get_labels()
@@ -48,7 +50,9 @@ class TestKMeansClusterer:
         centroids = clusterer.get_centroids()
         assert centroids.shape == (3, 3)  # 3 clusters, 3 features
 
-    def test_silhouette_score_valid_range(self, synthetic_feature_matrix: np.ndarray) -> None:
+    def test_silhouette_score_valid_range(
+        self, synthetic_feature_matrix: np.ndarray
+    ) -> None:
         clusterer = KMeansClusterer(n_clusters=3)
         clusterer.fit(synthetic_feature_matrix)
         score = clusterer.compute_silhouette(synthetic_feature_matrix)
