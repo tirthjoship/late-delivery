@@ -23,6 +23,8 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from loguru import logger  # noqa: E402
+
 from adapters.data.csv_repository import DataCoCSVRepository  # noqa: E402
 from adapters.ml.feature_encoder import FeatureEncoder  # noqa: E402
 from adapters.ml.mlflow_tracker import MLflowTracker  # noqa: E402
@@ -130,6 +132,12 @@ def print_result(result: TrainingResult) -> None:
 
 def main() -> None:
     args = parse_args()
+    logger.info(
+        "Training config — model: {} | sample: {} | tracking: {}",
+        args.model,
+        args.sample,
+        args.tracking_uri,
+    )
 
     # Select data path
     if args.sample:
@@ -172,6 +180,7 @@ def main() -> None:
         )
         print_result(result)
         results.append((run_name, result))
+        logger.info("Training complete for {}", run_name)
 
     # Summary table
     if len(results) > 1:
