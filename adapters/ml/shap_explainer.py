@@ -48,14 +48,16 @@ class ShapExplainer:
         feature_names: list[str],
     ) -> None:
         self._feature_names = feature_names
-        if isinstance(model, XGBClassifier):
-            self._explainer = shap.TreeExplainer(model)
-        elif isinstance(model, LogisticRegression):
+        # Unwrap predictor wrappers that expose a .model property
+        raw_model = getattr(model, "model", model)
+        if isinstance(raw_model, XGBClassifier):
+            self._explainer = shap.TreeExplainer(raw_model)
+        elif isinstance(raw_model, LogisticRegression):
             self._explainer = shap.LinearExplainer(
-                model, np.zeros((1, len(feature_names)))
+                raw_model, np.zeros((1, len(feature_names)))
             )
         else:
-            raise ValueError(f"Unsupported model type: {type(model)}")
+            raise ValueError(f"Unsupported model type: {type(raw_model)}")
 
     def explain_global(self, X: np.ndarray) -> ShapGlobalResult:
         """Compute global feature importance via mean absolute SHAP values."""
