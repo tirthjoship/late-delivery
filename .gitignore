@@ -2,6 +2,15 @@
 LOCAL_PROJECT_STORY.md
 PRODUCTION_READINESS_AUDIT.md
 .kiro/
+.claude/settings.local.json
+
+# Internal plans/specs — keep locally, not portfolio-facing
+docs/superpowers/plans/
+docs/superpowers/specs/
+docs/COMPLETION_CHECKLIST.md
+
+# Coverage artifacts
+.coverage
 
 # Raw data — never commit large CSV files to Git
 data/raw/

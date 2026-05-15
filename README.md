@@ -1,4 +1,47 @@
-# Supply Chain Optimization ML
+<!-- Banner placeholder — replace with your custom banner image -->
+<!-- <p align="center">
+  <img src="assets/banner.png" alt="Supply Chain Late Delivery Risk Prediction" width="900" />
+</p> -->
+
+<h1 align="center">Supply Chain Late Delivery Risk Prediction</h1>
+
+<p align="center">
+  <strong>Predict which orders will arrive late — before they ship.</strong>
+</p>
+
+<p align="center">
+  <a href="#quick-start">Quick Start</a> &bull;
+  <a href="#dashboard">Dashboard</a> &bull;
+  <a href="#model-comparison">Results</a> &bull;
+  <a href="#architecture">Architecture</a> &bull;
+  <a href="#explainability">Explainability</a> &bull;
+  <a href="docs/PROJECT_DEEP_DIVE.md">Deep Dive</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.12-blue?logo=python&logoColor=white" alt="Python 3.12" />
+  <img src="https://img.shields.io/badge/XGBoost-F1%200.65-green?logo=xgboost" alt="XGBoost F1" />
+  <img src="https://img.shields.io/badge/tests-154%20passed-brightgreen?logo=pytest" alt="Tests" />
+  <img src="https://img.shields.io/badge/coverage-92%25-brightgreen" alt="Coverage" />
+  <img src="https://img.shields.io/badge/mypy-strict-blue" alt="mypy strict" />
+  <img src="https://img.shields.io/badge/architecture-hexagonal-purple" alt="Hexagonal" />
+  <img src="https://img.shields.io/badge/MLflow-experiment%20tracking-blue?logo=mlflow" alt="MLflow" />
+  <img src="https://img.shields.io/badge/SHAP-explainability-orange" alt="SHAP" />
+</p>
+
+<p align="center">
+  <a href="https://supply-chain-optimization-ml.streamlit.app/">
+    <img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Open in Streamlit" />
+  </a>
+</p>
+
+<!-- Demo GIFs — uncomment after recording
+<p align="center">
+  <img src="assets/streamlit-demo.gif" alt="Streamlit Dashboard Demo" width="700" />
+</p>
+-->
+
+---
 
 Late delivery risk prediction for e-commerce orders using hexagonal architecture, XGBoost with SHAP explainability, and MLflow experiment tracking.
 
