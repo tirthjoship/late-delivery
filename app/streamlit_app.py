@@ -12,6 +12,7 @@ Or:
     make app
 """
 
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -38,6 +39,75 @@ from application.use_cases import (  # noqa: E402
 )
 from domain.models import RiskCohort  # noqa: E402
 from domain.ports import ExperimentTrackerPort  # noqa: E402
+
+# ---------------------------------------------------------------------------
+# Custom CSS for polished look
+# ---------------------------------------------------------------------------
+_CUSTOM_CSS = """
+<style>
+    /* Main container padding */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        padding: 10px 24px;
+        font-weight: 600;
+    }
+
+    /* Metric cards */
+    [data-testid="stMetric"] {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 12px 16px;
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: 0.85rem;
+        font-weight: 500;
+        opacity: 0.8;
+    }
+    [data-testid="stMetricValue"] {
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    /* Info/disclaimer boxes */
+    .disclaimer-box {
+        background-color: rgba(255, 255, 255, 0.04);
+        border-left: 3px solid #4A9EFF;
+        padding: 8px 14px;
+        border-radius: 4px;
+        font-size: 0.82rem;
+        margin-bottom: 1rem;
+        opacity: 0.85;
+    }
+
+    /* Section spacing */
+    .section-gap {
+        margin-top: 1.5rem;
+    }
+
+    /* Header subtitle */
+    .header-subtitle {
+        font-size: 1.05rem;
+        opacity: 0.7;
+        margin-top: -0.8rem;
+        margin-bottom: 1.5rem;
+    }
+</style>
+"""
 
 
 # ---------------------------------------------------------------------------
@@ -69,28 +139,27 @@ class _FakeTracker(ExperimentTrackerPort):
 
 
 # ---------------------------------------------------------------------------
+# Load pre-computed full-dataset metrics
+# ---------------------------------------------------------------------------
+@st.cache_data
+def load_full_metrics() -> dict[str, Any] | None:
+    """Load pre-computed metrics from the full 180k dataset run."""
+    metrics_path = _PROJECT_ROOT / "data" / "metrics" / "full_run_metrics.json"
+    if metrics_path.exists():
+        with open(metrics_path) as f:
+            result: dict[str, Any] = json.load(f)
+            return result
+    return None
+
+
+# ---------------------------------------------------------------------------
 # Cached pipeline loader — runs once per Streamlit session
 # ---------------------------------------------------------------------------
-@st.cache_resource(show_spinner="Training pipeline on sample data…")
+@st.cache_resource(show_spinner="Training models on sample data (1,000 orders)…")
 def load_pipeline() -> dict[str, Any]:
     """Train XGBoost + LogReg on sample CSV, run clustering, compute PCA + SHAP.
 
-    Returns a dict with all artifacts needed by the dashboard tabs:
-        orders          — list[Order] (full sample set)
-        xgb_model       — trained XGBoostPredictor
-        logreg_model    — trained LogisticRegressionPredictor
-        encoder         — fitted FeatureEncoder (from XGBoost run)
-        xgb_result      — TrainingResult for XGBoost
-        logreg_result   — TrainingResult for LogReg
-        xgb_explainer   — ShapExplainer for XGBoost
-        logreg_explainer— ShapExplainer for LogReg
-        cohorts         — list[RiskCohort]
-        X_pca           — (n, 2) PCA coordinates of full encoded feature set
-        cluster_labels  — (n,) integer cluster assignments
-        cohort_labels   — dict[int, str] cluster_id → label
-        feature_names   — list[str] post-encoding feature names
-        X_test_encoded  — pd.DataFrame encoded test split (for SHAP dependence)
-        xgb_shap_values — np.ndarray SHAP values matrix for test split
+    Returns a dict with all artifacts needed by the dashboard tabs.
     """
     sample_csv = Path(__file__).parent.parent / "data" / "sample" / "sample.csv"
 
@@ -181,16 +250,42 @@ def main() -> None:
         page_icon="🚚",
         layout="wide",
     )
-    st.title("Supply Chain Late Delivery Risk Dashboard")
-    st.caption(
-        "DataCo Supply Chain dataset · 54.83% late delivery rate · "
-        "XGBoost + LogReg · SHAP explanations · K-Means cohorts"
+
+    # Inject custom CSS
+    st.markdown(_CUSTOM_CSS, unsafe_allow_html=True)
+
+    # --- Hero header ---
+    st.markdown(
+        "<h1 style='text-align: center; margin-bottom: 0;'>"
+        "Supply Chain Late Delivery Risk Dashboard</h1>",
+        unsafe_allow_html=True,
     )
+    st.markdown(
+        "<p class='header-subtitle' style='text-align: center;'>"
+        "Predict &bull; Explain &bull; Compare &bull; Segment"
+        "</p>",
+        unsafe_allow_html=True,
+    )
+
+    # Key stats banner
+    full_metrics = load_full_metrics()
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Dataset", "180,519 orders")
+    col2.metric("Late Rate", "54.83%")
+    col3.metric("Best F1 (180k)", "0.6543")
+    col4.metric("Models Tracked", "4 variants")
+
+    st.markdown("---")
 
     pipeline = load_pipeline()
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["Predict & Explain", "Model Performance", "Risk Cohorts", "Dataset"]
+        [
+            "🔮 Predict & Explain",
+            "📊 Model Performance",
+            "🎯 Risk Cohorts",
+            "📋 Dataset Overview",
+        ]
     )
 
     with tab1:
@@ -201,7 +296,7 @@ def main() -> None:
     with tab2:
         from app.components.model_comparison import render_model_tab
 
-        render_model_tab(pipeline)
+        render_model_tab(pipeline, full_metrics)
 
     with tab3:
         from app.components.cohort_viz import render_cohorts_tab
@@ -212,6 +307,18 @@ def main() -> None:
         from app.components.dataset_overview import render_dataset_tab
 
         render_dataset_tab(pipeline)
+
+    # --- Footer ---
+    st.markdown("---")
+    st.markdown(
+        "<div style='text-align: center; opacity: 0.5; font-size: 0.8rem;'>"
+        "Built with Streamlit &bull; XGBoost &bull; SHAP &bull; MLflow &bull; "
+        "Hexagonal Architecture &bull; "
+        "<a href='https://github.com/tirthjoship/supply-chain-optimization-ml' "
+        "style='color: inherit;'>GitHub</a>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
 
 
 if __name__ == "__main__":
