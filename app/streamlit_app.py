@@ -268,12 +268,11 @@ def main() -> None:
             unsafe_allow_html=True,
         )
 
-    # --- Load data ---
+    # --- Load static data first (instant, no training) ---
     full_metrics = load_full_metrics()
     full_stats = load_full_stats()
-    pipeline = load_pipeline()
 
-    # --- Hero ---
+    # --- Hero (shows immediately while pipeline trains) ---
     st.markdown(
         "<h1 style='text-align: center; margin-bottom: 0;'>"
         "🚚 Supply Chain Late Delivery Risk</h1>",
@@ -344,6 +343,22 @@ that would leak the answer.
             )
 
     st.markdown("---")
+
+    # --- Train pipeline (shows animated loading while training) ---
+    loading_placeholder = st.empty()
+    with loading_placeholder.container():
+        st.markdown(
+            "<div style='text-align: center; padding: 3rem 0;'>"
+            "<div style='font-size: 2.5rem; margin-bottom: 0.5rem;'>🔄</div>"
+            "<h3 style='margin-bottom: 0.3rem;'>Preparing Dashboard</h3>"
+            "<p style='opacity: 0.6;'>Training XGBoost + LogReg on sample data "
+            "and computing SHAP explanations…<br>"
+            "<em>First load takes ~10 seconds, then cached.</em></p>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+    pipeline = load_pipeline()
+    loading_placeholder.empty()
 
     # --- Tabs ---
     tab1, tab2, tab3, tab4 = st.tabs(
