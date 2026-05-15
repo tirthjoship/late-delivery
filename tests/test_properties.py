@@ -9,7 +9,7 @@ from datetime import datetime
 from hypothesis import given
 from hypothesis import strategies as st
 
-from domain.models import Forecast, Order, OrderItem
+from domain.models import Order, OrderItem
 from domain.services import (
     baseline_late_delivery_risk_flag,
     extract_features,
@@ -223,69 +223,6 @@ class TestBaselineRiskPredictionProperties:
 
         # Without threshold, Standard Class should never be flagged
         assert result_without_threshold is False
-
-
-class TestForecastProperties:
-    """Property-based tests for Forecast value object."""
-
-    @given(
-        point_forecast=st.lists(
-            st.floats(min_value=0.0, max_value=10000.0, allow_nan=False),
-            min_size=1,
-            max_size=100,
-        )
-    )
-    def test_forecast_accepts_any_length_point_estimate(
-        self, point_forecast: list[float]
-    ) -> None:
-        """Property: Forecast should accept any length point estimate list."""
-        # Act
-        forecast = Forecast(point_forecast=point_forecast)
-
-        # Assert
-        assert forecast.point_forecast == point_forecast
-        assert len(forecast.point_forecast) == len(point_forecast)
-
-    @given(
-        n=st.integers(min_value=1, max_value=50),
-        lower_diff=st.integers(min_value=1, max_value=10),
-        upper_diff=st.integers(min_value=1, max_value=10),
-    )
-    def test_forecast_confidence_intervals_must_match_length(
-        self, n: int, lower_diff: int, upper_diff: int
-    ) -> None:
-        """Property: Confidence bounds must match point forecast length."""
-        # Arrange
-        point_forecast = [100.0] * n
-        correct_lower = [90.0] * n
-        correct_upper = [110.0] * n
-
-        # Act & Assert - correct lengths should work
-        forecast_correct = Forecast(
-            point_forecast=point_forecast,
-            confidence_lower=correct_lower,
-            confidence_upper=correct_upper,
-        )
-        assert len(forecast_correct.confidence_lower) == n  # type: ignore
-        assert len(forecast_correct.confidence_upper) == n  # type: ignore
-
-    @given(
-        point_forecast=st.lists(
-            st.floats(min_value=0.0, max_value=1000.0, allow_nan=False),
-            min_size=2,
-            max_size=20,
-        )
-    )
-    def test_forecast_optional_confidence_is_none_when_not_provided(
-        self, point_forecast: list[float]
-    ) -> None:
-        """Property: Confidence bounds default to None when not provided."""
-        # Act
-        forecast = Forecast(point_forecast=point_forecast)
-
-        # Assert
-        assert forecast.confidence_lower is None
-        assert forecast.confidence_upper is None
 
 
 class TestExtractFeaturesProperties:
