@@ -88,115 +88,83 @@ All training runs are logged to MLflow with:
 - SHAP explanations
 - Model Registry for production deployment
 
-## Architecture
-
-Hexagonal (ports & adapters) — domain logic is pure Python with zero framework imports.
+## How It Works
 
 ```mermaid
-graph LR
-    subgraph Domain["domain/ (pure Python)"]
-        Models[models.py<br/>Order, MetricsResult, TrainingResult]
-        Ports[ports.py<br/>ModelTrainerPort, ExplainerPort, ExperimentTrackerPort]
-        Services[services.py<br/>extract_features, baseline_risk]
+flowchart LR
+    subgraph Input["📦 Data In"]
+        CSV[DataCo CSV\n180K orders]
     end
 
-    subgraph Adapters["adapters/ (framework code)"]
-        CSV[csv_repository.py<br/>DataCo CSV + leakage shield]
-        Encoder[feature_encoder.py<br/>OneHot + StandardScaler]
-        Predictor[sklearn_predictor.py<br/>LogReg + XGBoost]
-        Eval[evaluation.py<br/>F1, precision, recall, AUC]
-        SHAP[shap_explainer.py<br/>TreeExplainer + LinearExplainer]
-        MLflow[mlflow_tracker.py<br/>SQLite backend + Model Registry]
+    subgraph Safety["🛡️ Leakage Shield"]
+        DROP[Drop 3 post-shipment\ncolumns automatically]
     end
 
-    subgraph Application["application/ (orchestration)"]
-        Train[TrainAndEvaluateUseCase<br/>load → split → encode → train → evaluate → explain → log]
-        Predict[PredictSingleOrderUseCase<br/>single order → risk + explanation]
+    subgraph Pipeline["🔄 ML Pipeline"]
+        FEAT[Extract 12\npre-shipment features]
+        SPLIT[Split FIRST\nthen encode]
+        TRAIN[Train XGBoost\n+ LogReg]
     end
 
-    subgraph Planned["planned (stubs)"]
-        direction TB
-        PyTorch[pytorch_predictor.py]:::stub
-        Plotly[plotly_charts.py]:::stub
-        DB[database_repository.py]:::stub
-        API[api_client.py]:::stub
+    subgraph Evaluate["📊 Evaluate & Explain"]
+        EVAL[F1 / Precision\nRecall / AUC-ROC]
+        SHAP[SHAP\nexplainability]
+        MLF[MLflow\ntrack & version]
     end
 
-    CSV --> Models
-    Encoder --> Ports
-    Predictor --> Ports
-    SHAP --> Ports
-    MLflow --> Ports
-    Train --> Services
-    Train --> Encoder
-    Train --> Predictor
-    Train --> SHAP
-    Train --> MLflow
-    Predict --> Services
-    Predict --> Encoder
-    Predict --> Predictor
-    Predict --> SHAP
+    subgraph Output["🎯 Outputs"]
+        DASH[Streamlit\nDashboard]
+        REG[Model\nRegistry]
+    end
 
-    classDef stub stroke-dasharray: 5 5,stroke:#999,color:#999
+    CSV --> DROP --> FEAT --> SPLIT --> TRAIN
+    TRAIN --> EVAL --> MLF --> REG
+    TRAIN --> SHAP --> DASH
+    EVAL --> DASH
 ```
+
+**Architecture:** Hexagonal (ports & adapters) — business rules in `domain/` have zero external imports. ML frameworks, data sources, and UI are swappable adapters.
+
+**Why this matters:** Swap XGBoost for LightGBM? Write one adapter file. Data from a database instead of CSV? One adapter. Domain logic and tests don't change.
 
 ## Repository Structure
 
 ```
 supply-chain-optimization-ml/
-├── domain/                          # Pure business logic (zero external imports)
-│   ├── models.py                    # Order, MetricsResult, TrainingResult, PredictionResult
-│   ├── ports.py                     # Protocol interfaces for all adapters
-│   ├── services.py                  # extract_features(), baseline_late_delivery_risk_flag()
+│
+├── 🧠 domain/                       # Business rules (zero external imports)
+│   ├── models.py                    # Order, Product, MetricsResult, RiskCohort
+│   ├── ports.py                     # Interfaces adapters must implement
+│   ├── services.py                  # Feature extraction, risk classification
 │   └── exceptions.py               # Domain-specific errors
 │
-├── adapters/                        # External framework integrations
-│   ├── data/
-│   │   ├── csv_repository.py        # DataCo CSV reader with leakage column shield
-│   │   ├── database_repository.py   # DB adapter (stub)
-│   │   └── api_client.py            # API adapter (stub)
-│   └── ml/
-│       ├── feature_encoder.py       # ColumnTransformer (OneHot + StandardScaler)
-│       ├── sklearn_predictor.py     # LogisticRegression + XGBoost predictors
-│       ├── evaluation.py            # compute_metrics() → MetricsResult
-│       ├── shap_explainer.py        # SHAP global + local explanations
-│       ├── mlflow_tracker.py        # MLflow SQLite backend + Model Registry
-│       └── pytorch_predictor.py     # Neural net adapter (stub)
+├── 🔌 adapters/                     # External tool integrations
+│   ├── data/csv_repository.py       # CSV reader + leakage column shield
+│   ├── ml/feature_encoder.py        # OneHot + StandardScaler encoding
+│   ├── ml/sklearn_predictor.py      # LogReg + XGBoost model wrappers
+│   ├── ml/evaluation.py             # F1, precision, recall, AUC-ROC
+│   ├── ml/shap_explainer.py         # SHAP TreeExplainer + LinearExplainer
+│   ├── ml/mlflow_tracker.py         # MLflow logging + Model Registry
+│   ├── ml/kmeans_clusterer.py       # K-Means clustering + silhouette
+│   └── visualization/plotly_charts.py  # 8 interactive Plotly charts
 │
-├── application/                     # Use case orchestration
-│   └── use_cases.py                 # TrainAndEvaluateUseCase, PredictSingleOrderUseCase
+├── 🎯 application/                  # Orchestration layer
+│   └── use_cases.py                 # Train, Predict, Cluster, Profile
 │
-├── tests/                           # 110+ tests, 90% coverage
-│   ├── conftest.py                  # Synthetic order fixtures (never loads real CSV)
-│   ├── test_domain_models.py        # Domain model invariants
-│   ├── test_domain_services.py      # Feature extraction, baseline risk
-│   ├── test_csv_repository.py       # CSV parsing, leakage shield
-│   ├── test_properties.py          # Hypothesis property-based tests
-│   ├── test_use_cases.py            # End-to-end pipeline tests
-│   └── test_ml/                     # ML adapter contract tests
-│       ├── test_feature_encoder.py
-│       ├── test_sklearn_predictor.py
-│       ├── test_evaluation.py
-│       ├── test_shap_explainer.py
-│       └── test_mlflow_tracker.py
+├── 📱 app/                          # Streamlit dashboard (4 tabs)
+│   ├── streamlit_app.py             # Entry point + sidebar toggle
+│   └── components/                  # Tab implementations
 │
-├── notebooks/
-│   ├── eda_initial.ipynb            # Exploratory data analysis (180k orders)
-│   └── train_pipeline.ipynb         # Training narrative (model comparison + SHAP)
+├── 🧪 tests/                        # 140+ tests, 92% coverage
+│   ├── test_domain_*.py             # Domain model + service tests
+│   ├── test_ml/                     # Adapter contract tests
+│   ├── test_properties.py           # Hypothesis property-based tests
+│   └── test_visualization/          # Chart output tests
 │
-├── scripts/
-│   ├── train.py                     # CLI training entry point
-│   └── generate_sample.py           # Generate PII-stripped sample CSV
-│
-├── data/
-│   ├── raw/                         # Full DataCo CSV (gitignored, 95MB)
-│   └── sample/
-│       └── sample.csv               # 1000-row PII-stripped sample (committed)
-│
-├── .github/workflows/               # CI: tests, lint, mypy strict, gitleaks
-├── .pre-commit-config.yaml          # black, isort, mypy, ruff, gitleaks
-├── Makefile                         # make test, lint, typecheck, check
-└── pyproject.toml                   # Python 3.12, mypy strict, 90% coverage gate
+├── 📓 notebooks/                    # EDA + training narrative
+├── 📜 scripts/train.py              # CLI training entry point
+├── 📊 data/                         # Raw (gitignored) + sample (committed)
+└── ⚙️ .github/workflows/            # CI: lint, test, typecheck, security
 ```
 
 ## Data Leakage Protection
@@ -245,16 +213,16 @@ make app
 # Opens at http://localhost:8501
 ```
 
-- **Predict & Explain** — Enter order details, get risk score + SHAP explanation
-- **Model Performance** — Side-by-side LogReg vs XGBoost metrics + SHAP importance
-- **Risk Cohorts** — K-Means cluster scatter + cohort profile cards
-- **Dataset** — Key statistics + shipping mode + region breakdowns
+- **🔮 Risk Predictor** — Enter order details, get live risk score + SHAP waterfall
+- **📊 Model Results** — Side-by-side LogReg vs XGBoost metrics + SHAP importance
+- **🎯 Customer Segments** — K-Means cluster profiles + PCA scatter
+- **📋 Data Explorer** — Key statistics + shipping mode + region distributions
 
-Models train on the 1000-row sample CSV at startup (~3 seconds, cached).
+Sidebar toggle switches between **Full Dataset (180K)** and **Sample (1K)** statistics. Risk Predictor uses sample-trained model for live interactivity.
 
 ## Quality
 
-- **110+ tests** at 90% coverage (90% gate enforced in CI)
+- **140+ tests** at 92% coverage (90% gate enforced in CI)
 - **mypy strict** — full type safety across domain, adapters, application
 - **Pre-commit hooks** — black, isort, ruff, mypy, gitleaks
 - **Property-based testing** — Hypothesis for domain invariants
