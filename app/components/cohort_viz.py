@@ -1,10 +1,25 @@
 """Customer Segments tab — K-Means risk cohorts with data source toggle."""
 
+import json
+from pathlib import Path
 from typing import Any
 
+import numpy as np
 import streamlit as st
 
 from adapters.visualization.plotly_charts import cluster_scatter_2d
+
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
+
+@st.cache_data
+def _load_full_pca() -> dict[str, Any] | None:
+    """Load pre-computed PCA cluster coordinates for full dataset."""
+    path = _PROJECT_ROOT / "data" / "metrics" / "full_pca_clusters.json"
+    if path.exists():
+        with open(path) as f:
+            return json.load(f)
+    return None
 
 
 def _risk_indicator(late_rate: float) -> tuple[str, str]:
@@ -76,26 +91,51 @@ def render_cohorts_tab(
         )
 
     if use_full and full_stats:
-        # Full dataset — PCA scatter requires live computation, show note
-        st.info(
-            "📊 **Cluster visualization** is available in Sample (1K) mode "
-            "(sidebar toggle) where PCA coordinates are computed live. "
-            "Full dataset profiles are shown below."
-        )
-        st.markdown("##### Cohort Profiles (65,752 orders)")
         cohorts_data = sorted(
             full_stats["cohorts"], key=lambda c: c["late_rate"], reverse=True
         )
-        for c in cohorts_data:
-            _render_cohort_card(
-                label=c["label"],
-                size=c["size"],
-                late_rate=c["late_rate"],
-                avg_days=c["avg_scheduled_days"],
-                dominant_mode=c["dominant_shipping_mode"],
-                top_regions=c.get("top_regions", {}),
-                expanded=c["late_rate"] >= 0.70,
-            )
+        cohort_label_map = {c["cluster_id"]: c["label"] for c in full_stats["cohorts"]}
+
+        # Try to load pre-computed PCA
+        full_pca = _load_full_pca()
+
+        if full_pca:
+            scatter_col, cards_col = st.columns([3, 2])
+            with scatter_col:
+                st.markdown("##### Cluster Visualization (PCA 2D)")
+                st.caption(
+                    f"2,000-point subsample from {full_pca['total_orders']:,} orders"
+                )
+                X_pca = np.column_stack([full_pca["pc1"], full_pca["pc2"]])
+                cluster_labels = np.array(full_pca["cluster"])
+                scatter_fig = cluster_scatter_2d(
+                    X_pca, cluster_labels, cohort_labels=cohort_label_map
+                )
+                st.plotly_chart(scatter_fig, use_container_width=True)
+            with cards_col:
+                st.markdown("##### Cohort Profiles (65,752 orders)")
+                for c in cohorts_data:
+                    _render_cohort_card(
+                        label=c["label"],
+                        size=c["size"],
+                        late_rate=c["late_rate"],
+                        avg_days=c["avg_scheduled_days"],
+                        dominant_mode=c["dominant_shipping_mode"],
+                        top_regions=c.get("top_regions", {}),
+                        expanded=c["late_rate"] >= 0.70,
+                    )
+        else:
+            st.markdown("##### Cohort Profiles (65,752 orders)")
+            for c in cohorts_data:
+                _render_cohort_card(
+                    label=c["label"],
+                    size=c["size"],
+                    late_rate=c["late_rate"],
+                    avg_days=c["avg_scheduled_days"],
+                    dominant_mode=c["dominant_shipping_mode"],
+                    top_regions=c.get("top_regions", {}),
+                    expanded=c["late_rate"] >= 0.70,
+                )
     else:
         # Sample — has live PCA scatter
         cohorts = pipeline["cohorts"]
@@ -132,9 +172,3 @@ def render_cohorts_tab(
                     top_regions=top_regions,
                     expanded=cohort.late_rate >= 0.70,
                 )
-
-    # Tip at bottom
-    st.caption(
-        "Switch to Sample (1K) in the sidebar to see the interactive PCA "
-        "scatter plot alongside cohort cards."
-    )
