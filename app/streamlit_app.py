@@ -12,20 +12,32 @@ Or:
     make app
 """
 
+import sys
 from pathlib import Path
 from typing import Any
 
-import streamlit as st
-from sklearn.decomposition import PCA
+# Add project root to path so adapters/domain/application are importable
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
-from adapters.data.csv_repository import DataCoCSVRepository
-from adapters.ml.feature_encoder import FeatureEncoder
-from adapters.ml.kmeans_clusterer import KMeansClusterer
-from adapters.ml.shap_explainer import ShapExplainer
-from adapters.ml.sklearn_predictor import LogisticRegressionPredictor, XGBoostPredictor
-from application.use_cases import ProfileClustersUseCase, TrainAndEvaluateUseCase
-from domain.models import RiskCohort
-from domain.ports import ExperimentTrackerPort
+import streamlit as st  # noqa: E402
+from sklearn.decomposition import PCA  # noqa: E402
+
+from adapters.data.csv_repository import DataCoCSVRepository  # noqa: E402
+from adapters.ml.feature_encoder import FeatureEncoder  # noqa: E402
+from adapters.ml.kmeans_clusterer import KMeansClusterer  # noqa: E402
+from adapters.ml.shap_explainer import ShapExplainer  # noqa: E402
+from adapters.ml.sklearn_predictor import (  # noqa: E402
+    LogisticRegressionPredictor,
+    XGBoostPredictor,
+)
+from application.use_cases import (  # noqa: E402
+    ProfileClustersUseCase,
+    TrainAndEvaluateUseCase,
+)
+from domain.models import RiskCohort  # noqa: E402
+from domain.ports import ExperimentTrackerPort  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
