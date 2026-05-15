@@ -18,7 +18,7 @@ from typing import Any
 import streamlit as st
 from sklearn.decomposition import PCA
 
-from adapters.data.csv_repository import CSVRepository
+from adapters.data.csv_repository import DataCoCSVRepository
 from adapters.ml.feature_encoder import FeatureEncoder
 from adapters.ml.kmeans_clusterer import KMeansClusterer
 from adapters.ml.shap_explainer import ShapExplainer
@@ -82,7 +82,7 @@ def load_pipeline() -> dict[str, Any]:
     """
     sample_csv = Path(__file__).parent.parent / "data" / "sample" / "sample.csv"
 
-    data_repo = CSVRepository(str(sample_csv))
+    data_repo = DataCoCSVRepository(str(sample_csv))
     orders = data_repo.get_orders()
     tracker = _FakeTracker()
 
