@@ -85,7 +85,7 @@ Five hard stops — see `AGENTS.md` for full details:
 - SHAP explainer adapter — global + local explanations (TreeExplainer/LinearExplainer)
 - MLflow tracker adapter — local tracking + Model Registry
 - Application use cases — TrainAndEvaluateUseCase + PredictSingleOrderUseCase
-- Test suite (105 tests, 92% coverage) — domain, adapter, property-based, integration
+- Test suite (140+ tests, 92% coverage) — domain, adapter, property-based, integration
 - EDA notebook — full analysis of 180k orders
 - CI workflows (test + lint + security) — 3 GitHub Actions
 - Pre-commit hooks — black, isort, mypy strict, ruff, gitleaks, file hygiene
@@ -93,12 +93,11 @@ Five hard stops — see `AGENTS.md` for full details:
 - Agent Development Kit — 4 agents, 2 skills, guardrail hooks
 - CLAUDE.md + AGENTS.md — project orientation and coding standards
 - PR and issue templates
-- Streamlit dashboard with 4 tabs (Predict, Model Performance, Cohorts, Dataset)
+- Streamlit dashboard with 4 tabs + sidebar toggle (Risk Predictor, Model Results, Customer Segments, Data Explorer)
 - Phase 4.5 K-Means clustering pipeline (RiskCohort, ClusteringPort, FitClusters, ProfileClusters)
 - Plotly visualization adapter with 8 chart functions
-
-**Skeleton (1-line stubs):**
-- `adapters/ml/pytorch_predictor.py` — neural net adapter
+- Pre-computed full-dataset metrics (180K) for dashboard Strategy C
+- Live Streamlit deployment at https://supply-chain-optimization-ml.streamlit.app/
 
 **Planned:**
 
