@@ -13,9 +13,9 @@
   <a href="#quick-start">Quick Start</a> &bull;
   <a href="#dashboard">Dashboard</a> &bull;
   <a href="#model-comparison">Results</a> &bull;
-  <a href="#architecture">Architecture</a> &bull;
+  <a href="#how-it-works">Architecture</a> &bull;
   <a href="#explainability">Explainability</a> &bull;
-  <a href="docs/PROJECT_DEEP_DIVE.md">Deep Dive</a>
+  <a href="docs/ARCHITECTURE.md">Design Decisions</a>
 </p>
 
 <p align="center">
