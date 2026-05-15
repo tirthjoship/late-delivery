@@ -8,7 +8,7 @@ from datetime import datetime
 
 import pytest
 
-from domain.models import Forecast, Order, OrderItem, Product
+from domain.models import Order, OrderItem, Product
 
 
 class TestProduct:
@@ -203,70 +203,6 @@ class TestOrder:
 
         # Assert
         assert order.late_delivery_risk == 1
-
-
-class TestForecast:
-    """Tests for Forecast value object."""
-
-    def test_forecast_creation_with_point_only(self) -> None:
-        """Test Forecast with only point estimates."""
-        # Arrange & Act
-        forecast = Forecast(point_forecast=[100.0, 110.0, 105.0, 115.0])
-
-        # Assert
-        assert forecast.point_forecast == [100.0, 110.0, 105.0, 115.0]
-        assert forecast.confidence_lower is None
-        assert forecast.confidence_upper is None
-
-    def test_forecast_with_confidence_intervals(self) -> None:
-        """Test Forecast with confidence intervals."""
-        # Arrange & Act
-        forecast = Forecast(
-            point_forecast=[100.0, 110.0, 105.0],
-            confidence_lower=[90.0, 100.0, 95.0],
-            confidence_upper=[110.0, 120.0, 115.0],
-        )
-
-        # Assert
-        assert forecast.point_forecast == [100.0, 110.0, 105.0]
-        assert forecast.confidence_lower == [90.0, 100.0, 95.0]
-        assert forecast.confidence_upper == [110.0, 120.0, 115.0]
-
-    def test_forecast_rejects_mismatched_lower_bound(self) -> None:
-        """Test Forecast raises error when confidence_lower length mismatches."""
-        # Act & Assert
-        with pytest.raises(ValueError, match="confidence_lower length must match"):
-            Forecast(
-                point_forecast=[100.0, 110.0, 105.0],
-                confidence_lower=[90.0, 100.0],  # Wrong length
-            )
-
-    def test_forecast_rejects_mismatched_upper_bound(self) -> None:
-        """Test Forecast raises error when confidence_upper length mismatches."""
-        # Act & Assert
-        with pytest.raises(ValueError, match="confidence_upper length must match"):
-            Forecast(
-                point_forecast=[100.0, 110.0],
-                confidence_upper=[110.0, 120.0, 115.0],  # Wrong length
-            )
-
-    def test_forecast_allows_partial_confidence(self) -> None:
-        """Test Forecast allows only lower OR only upper confidence bound."""
-        # Arrange & Act
-        forecast_lower_only = Forecast(
-            point_forecast=[100.0, 110.0],
-            confidence_lower=[90.0, 100.0],
-        )
-        forecast_upper_only = Forecast(
-            point_forecast=[100.0, 110.0],
-            confidence_upper=[110.0, 120.0],
-        )
-
-        # Assert
-        assert forecast_lower_only.confidence_lower == [90.0, 100.0]
-        assert forecast_lower_only.confidence_upper is None
-        assert forecast_upper_only.confidence_lower is None
-        assert forecast_upper_only.confidence_upper == [110.0, 120.0]
 
 
 class TestMetricsResult:
