@@ -1,0 +1,45 @@
+{
+  "dataset": "DataCo Supply Chain (180,519 orders)",
+  "train_size": 144415,
+  "test_size": 36104,
+  "models": {
+    "LogisticRegression": {
+      "f1": 0.6531,
+      "precision": 0.8515,
+      "recall": 0.5297,
+      "auc_roc": 0.7241,
+      "confusion_matrix": [[5275, 666], [3391, 3819]],
+      "feature_importances": {
+        "days_for_shipment_scheduled": 0.3883,
+        "shipping_mode_Standard Class": 0.3534,
+        "shipping_mode_First Class": 0.2947,
+        "shipping_mode_Second Class": 0.0912,
+        "shipping_mode_Same Day": 0.0812,
+        "item_count": 0.0167,
+        "total_quantity": 0.0134,
+        "sales_per_customer": 0.0082,
+        "order_region_Western Europe": 0.008,
+        "total_discount": 0.0047
+      }
+    },
+    "XGBoost": {
+      "f1": 0.6543,
+      "precision": 0.8448,
+      "recall": 0.5338,
+      "auc_roc": 0.7233,
+      "confusion_matrix": [[5234, 707], [3361, 3849]],
+      "feature_importances": {
+        "shipping_mode_Standard Class": 0.616,
+        "shipping_mode_First Class": 0.4318,
+        "shipping_mode_Second Class": 0.1344,
+        "shipping_mode_Same Day": 0.0748,
+        "sales_per_customer": 0.0541,
+        "total_discount": 0.0465,
+        "avg_unit_price": 0.0452,
+        "benefit_per_order": 0.0421,
+        "total_quantity": 0.02,
+        "order_month": 0.0188
+      }
+    }
+  }
+}

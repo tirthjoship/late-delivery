@@ -108,29 +108,6 @@ class Order:
     """Binary target (0/1) when labels are present; None if unknown."""
 
 
-@dataclass
-class Forecast:
-    """Demand forecast with optional confidence intervals.
-
-    Steering: demand predictions with confidence intervals.
-    """
-
-    point_forecast: list[float]
-    """Point estimates of demand per period."""
-    confidence_lower: Optional[list[float]] = None
-    """Lower bound of confidence interval per period (optional)."""
-    confidence_upper: Optional[list[float]] = None
-    """Upper bound of confidence interval per period (optional)."""
-
-    def __post_init__(self) -> None:
-        """Validate consistent lengths when confidence is provided."""
-        n = len(self.point_forecast)
-        if self.confidence_lower is not None and len(self.confidence_lower) != n:
-            raise ValueError("confidence_lower length must match point_forecast")
-        if self.confidence_upper is not None and len(self.confidence_upper) != n:
-            raise ValueError("confidence_upper length must match point_forecast")
-
-
 @dataclass(frozen=True)
 class MetricsResult:
     """Evaluation metrics for a trained model.
