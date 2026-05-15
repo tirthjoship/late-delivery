@@ -59,13 +59,11 @@ def _build_order_from_form(
 def render_prediction_tab(pipeline: dict[str, Any]) -> None:
     """Render the Predict & Explain tab."""
     st.header("Predict Late Delivery Risk")
-    st.markdown(
-        "<div class='disclaimer-box'>"
-        "⚡ <strong>Live prediction</strong> — model trained on 1,000-row sample "
-        "for real-time interaction. Enter order details to get a risk score with "
-        "SHAP explanation."
-        "</div>",
-        unsafe_allow_html=True,
+    st.warning(
+        "**Demo Mode** — This predictor uses a model trained on a 1,000-order "
+        "sample for real-time interactivity. Predictions illustrate how the model "
+        "works, not production-grade accuracy. "
+        "See the **Model Results** tab (Full Dataset) for metrics from 180K orders."
     )
 
     left_col, spacer, right_col = st.columns([4, 1, 6])
