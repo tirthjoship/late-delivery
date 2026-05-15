@@ -76,8 +76,13 @@ def render_cohorts_tab(
         )
 
     if use_full and full_stats:
-        # Full dataset — no PCA scatter (would need live computation)
-        st.markdown("##### Cohort Profiles")
+        # Full dataset — PCA scatter requires live computation, show note
+        st.info(
+            "📊 **Cluster visualization** is available in Sample (1K) mode "
+            "(sidebar toggle) where PCA coordinates are computed live. "
+            "Full dataset profiles are shown below."
+        )
+        st.markdown("##### Cohort Profiles (65,752 orders)")
         cohorts_data = sorted(
             full_stats["cohorts"], key=lambda c: c["late_rate"], reverse=True
         )

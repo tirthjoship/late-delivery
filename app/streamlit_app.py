@@ -145,7 +145,9 @@ def load_full_stats() -> dict[str, Any] | None:
     return None
 
 
-@st.cache_resource(show_spinner="Training models on 1,000-order sample…")
+@st.cache_resource(
+    show_spinner="🔄 Training XGBoost + LogReg on sample data — this takes ~5 seconds on first load…"
+)
 def load_pipeline() -> dict[str, Any]:
     """Train XGBoost + LogReg on sample CSV, run clustering, compute SHAP."""
     sample_csv = _PROJECT_ROOT / "data" / "sample" / "sample.csv"
@@ -294,7 +296,7 @@ First Class shipping, despite its premium branding, has a <strong>95.3% late rat
 This project predicts which orders will arrive late <em>before they ship</em>,
 enabling logistics teams to reroute, prioritize, or proactively notify customers.
 </p>
-<h3>🎯 What We Built</h3>
+<h3>🎯 What I Built</h3>
 <p style="margin-bottom: 0;">
 An end-to-end ML pipeline with <strong>XGBoost + SHAP explainability</strong>,
 <strong>MLflow experiment tracking</strong>, and <strong>hexagonal architecture</strong>
