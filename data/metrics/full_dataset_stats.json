@@ -1,0 +1,64 @@
+{
+  "dataset": {
+    "total_orders": 65752,
+    "total_rows": 180519,
+    "late_orders": 36048,
+    "late_rate": 0.5482,
+    "shipping_modes": ["First Class", "Same Day", "Second Class", "Standard Class"],
+    "regions": ["Canada", "Caribbean", "Central Africa", "Central America", "Central Asia", "East Africa", "East of USA", "Eastern Asia", "Eastern Europe", "North Africa", "Northern Europe", "Oceania", "South America", "South Asia", "South of  USA", "Southeast Asia", "Southern Africa", "Southern Europe", "US Center", "West Africa", "West Asia", "West of USA", "Western Europe"],
+    "late_rate_by_mode": {
+      "First Class": 0.9527,
+      "Second Class": 0.7672,
+      "Same Day": 0.4615,
+      "Standard Class": 0.3813
+    },
+    "late_rate_by_region": {
+      "Central Africa": 0.5755, "South of  USA": 0.5599, "West Asia": 0.5598,
+      "Eastern Europe": 0.5596, "South Asia": 0.5592, "Western Europe": 0.5579,
+      "Southeast Asia": 0.5558, "Central Asia": 0.5543, "US Center": 0.5535,
+      "East of USA": 0.5493, "Central America": 0.5487, "Eastern Asia": 0.5479,
+      "Oceania": 0.5461, "West of USA": 0.5441, "North Africa": 0.5432,
+      "South America": 0.5415, "Southern Africa": 0.5377, "Northern Europe": 0.5371,
+      "Southern Europe": 0.5349, "Caribbean": 0.5299, "East Africa": 0.5677,
+      "West Africa": 0.5119, "Canada": 0.4951
+    }
+  },
+  "cohorts": [
+    {
+      "cluster_id": 0,
+      "label": "Medium-Risk Standard Class",
+      "size": 429,
+      "late_rate": 0.5058,
+      "dominant_shipping_mode": "Standard Class",
+      "avg_scheduled_days": 3.14,
+      "top_regions": {"Western Europe": 0.4592, "Northern Europe": 0.1678, "Southern Europe": 0.1678}
+    },
+    {
+      "cluster_id": 1,
+      "label": "Low-Risk Standard Class",
+      "size": 23440,
+      "late_rate": 0.3828,
+      "dominant_shipping_mode": "Standard Class",
+      "avg_scheduled_days": 4.0,
+      "top_regions": {"Western Europe": 0.1508, "Central America": 0.1255, "Southeast Asia": 0.0815}
+    },
+    {
+      "cluster_id": 2,
+      "label": "High-Risk Second Class",
+      "size": 17740,
+      "late_rate": 0.7952,
+      "dominant_shipping_mode": "Second Class",
+      "avg_scheduled_days": 1.3,
+      "top_regions": {"Western Europe": 0.1514, "Central America": 0.1322, "Oceania": 0.0752}
+    },
+    {
+      "cluster_id": 3,
+      "label": "Medium-Risk Standard Class",
+      "size": 24143,
+      "late_rate": 0.5282,
+      "dominant_shipping_mode": "Standard Class",
+      "avg_scheduled_days": 3.1,
+      "top_regions": {"Central America": 0.1702, "Western Europe": 0.1488, "South America": 0.0876}
+    }
+  ]
+}
