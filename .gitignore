@@ -11,6 +11,7 @@ AGENTS.md
 docs/superpowers/plans/
 docs/superpowers/specs/
 docs/COMPLETION_CHECKLIST.md
+docs/PROJECT_DEEP_DIVE.md
 
 # Conda env — requirements.txt covers deps for Streamlit Cloud
 environment.yml
