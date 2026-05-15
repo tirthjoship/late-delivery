@@ -163,7 +163,11 @@ def shap_importance_bar(importances: dict[str, float]) -> go.Figure:
     Returns:
         go.Figure with horizontal bar trace sorted by importance.
     """
-    sorted_items = sorted(importances.items(), key=lambda kv: kv[1])
+    # Filter out near-zero features for cleaner display
+    filtered = {k: v for k, v in importances.items() if abs(v) >= 0.005}
+    if not filtered:
+        filtered = importances  # fallback: show all if everything is tiny
+    sorted_items = sorted(filtered.items(), key=lambda kv: kv[1])
     features = [item[0] for item in sorted_items]
     values = [item[1] for item in sorted_items]
 
