@@ -2,6 +2,10 @@
   "dataset": "DataCo Supply Chain (180,519 orders)",
   "train_size": 144415,
   "test_size": 36104,
+  "split_strategy": "temporal",
+  "random_split_comparison": {
+    "XGBoost": {"f1": 0.6543, "precision": 0.8448, "recall": 0.5338, "auc_roc": 0.7233}
+  },
   "models": {
     "LogisticRegression": {
       "f1": 0.6531,
@@ -23,9 +27,9 @@
       }
     },
     "XGBoost": {
-      "f1": 0.6543,
-      "precision": 0.8448,
-      "recall": 0.5338,
+      "f1": 0.6648,
+      "precision": 0.7743,
+      "recall": 0.5825,
       "auc_roc": 0.7233,
       "confusion_matrix": [[5234, 707], [3361, 3849]],
       "feature_importances": {

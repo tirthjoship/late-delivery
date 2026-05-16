@@ -50,8 +50,19 @@ class TrainAndEvaluateUseCase:
         random_state: int = 42,
         risk_threshold: float = 0.5,
         run_name: str | None = None,
+        split_strategy: str = "random",
     ) -> TrainingResult:
-        """Run full training pipeline and return results."""
+        """Run full training pipeline and return results.
+
+        Args:
+            split_strategy: "random" (stratified shuffle) or "temporal" (date-ordered).
+        """
+        if split_strategy not in ("random", "temporal"):
+            msg = (
+                f"split_strategy must be 'random' or 'temporal', got '{split_strategy}'"
+            )
+            raise ValueError(msg)
+
         # 1. Load orders
         orders = self._data_repo.get_orders()
         logger.info("Loaded {} orders from data repository", len(orders))
@@ -60,16 +71,33 @@ class TrainAndEvaluateUseCase:
         raw_features = [extract_features(o) for o in orders]
         labels = np.array([o.late_delivery_risk for o in orders])
 
-        # 3. SPLIT FIRST — before any encoding
-        raw_train, raw_test, y_train, y_test = train_test_split(
-            raw_features,
-            labels,
-            test_size=test_size,
-            random_state=random_state,
-            stratify=labels,
-        )
+        # 3. SPLIT — strategy determines method
+        if split_strategy == "temporal":
+            # Sort by order_date, take first (1-test_size) as train
+            sorted_indices = sorted(
+                range(len(orders)), key=lambda i: orders[i].order_date
+            )
+            cutoff = int(len(sorted_indices) * (1 - test_size))
+            train_idx = sorted_indices[:cutoff]
+            test_idx = sorted_indices[cutoff:]
+            raw_train = [raw_features[i] for i in train_idx]
+            raw_test = [raw_features[i] for i in test_idx]
+            y_train = labels[train_idx]
+            y_test = labels[test_idx]
+        else:
+            # Original random stratified split
+            raw_train, raw_test, y_train, y_test = train_test_split(
+                raw_features,
+                labels,
+                test_size=test_size,
+                random_state=random_state,
+                stratify=labels,
+            )
         logger.info(
-            "Split: {} train / {} test (stratified)", len(raw_train), len(raw_test)
+            "Split ({}): {} train / {} test",
+            split_strategy,
+            len(raw_train),
+            len(raw_test),
         )
 
         # 4. Encode — fit on train ONLY
@@ -85,6 +113,7 @@ class TrainAndEvaluateUseCase:
                 "model": model_name,
                 "test_size": str(test_size),
                 "random_state": str(random_state),
+                "split_strategy": split_strategy,
                 "n_features": str(len(feature_names)),
                 "n_train": str(len(raw_train)),
                 "n_test": str(len(raw_test)),
@@ -149,7 +178,7 @@ class PredictSingleOrderUseCase:
         feature_encoder: FeatureEncoder,
         model: ModelTrainerPort,
         explainer: Any,
-        risk_threshold: float = 0.5,
+        risk_threshold: float = 0.35,  # Cost-optimized: FN=3x FP
     ) -> None:
         self._encoder = feature_encoder
         self._model = model
