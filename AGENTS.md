@@ -57,30 +57,36 @@
 ## Project Layout
 
 ```
-domain/                 Pure business logic
-├── models.py           Frozen dataclasses (Product, Order, OrderItem, Forecast)
-├── ports.py            Protocol interfaces (SalesDataRepository)
-├── services.py         Business rules (risk classification, baseline prediction)
+domain/                 Pure business logic (ZERO external imports)
+├── models.py           Dataclasses (Product, Order, OrderItem, MetricsResult, TrainingResult, PredictionResult, RiskCohort)
+├── ports.py            Protocol interfaces (SalesDataRepository, ModelTrainerPort, ExplainerPort, ExperimentTrackerPort, ClusteringPort)
+├── services.py         Business rules (extract_features, baseline_risk_flag, validate_cohort_separation)
 └── exceptions.py       Domain-specific errors
 
 adapters/               External connections
-├── data/               Data source connectors
-│   ├── csv_repository.py   DataCo CSV with leakage shield
-│   ├── database_repository.py
-│   └── api_client.py
-├── ml/                 Model adapters
-│   ├── sklearn_predictor.py
-│   └── pytorch_predictor.py
-└── visualization/      Charting adapters
-    └── plotly_charts.py
+├── data/
+│   └── csv_repository.py   DataCo CSV with leakage shield
+├── ml/
+│   ├── sklearn_predictor.py   LogReg + XGBoost (ModelTrainerPort)
+│   ├── feature_encoder.py     OneHot + StandardScaler
+│   ├── shap_explainer.py      Tree/Linear SHAP (ExplainerPort)
+│   ├── kmeans_clusterer.py    K-Means (ClusteringPort)
+│   ├── mlflow_tracker.py      MLflow + Model Registry
+│   ├── calibration.py         Isotonic/Platt post-hoc calibration
+│   └── evaluation.py          F1, precision, recall, AUC-ROC
+└── visualization/
+    └── plotly_charts.py       Risk gauge, SHAP waterfall, confusion matrix
 
 application/            Orchestration
-└── use_cases.py        Wires domain + adapters for business workflows
+└── use_cases.py        TrainAndEvaluate (random/temporal split), PredictSingleOrder, FitClusters, ProfileClusters
 
-tests/                  Mirrors source layout
+tests/                  156 tests, 93% coverage
+├── conftest.py             Fixtures (synthetic_orders, temporal_synthetic_orders)
 ├── test_domain_models.py
 ├── test_domain_services.py
 ├── test_csv_repository.py
+├── test_use_cases.py       Integration + temporal split tests
+├── test_calibration.py     Calibration adapter tests
 └── test_properties.py      Property-based (Hypothesis)
 
 notebooks/              Exploration and EDA only — no production logic

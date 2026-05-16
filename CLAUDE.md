@@ -84,8 +84,8 @@ Five hard stops — see `AGENTS.md` for full details:
 - Evaluation adapter — compute_metrics() returning domain MetricsResult
 - SHAP explainer adapter — global + local explanations (TreeExplainer/LinearExplainer)
 - MLflow tracker adapter — local tracking + Model Registry
-- Application use cases — TrainAndEvaluateUseCase + PredictSingleOrderUseCase
-- Test suite (140+ tests, 92% coverage) — domain, adapter, property-based, integration
+- Application use cases — TrainAndEvaluateUseCase (random + temporal split) + PredictSingleOrderUseCase (threshold=0.35)
+- Test suite (156 tests, 93% coverage) — domain, adapter, property-based, integration
 - EDA notebook — full analysis of 180k orders
 - CI workflows (test + lint + security) — 3 GitHub Actions
 - Pre-commit hooks — black, isort, mypy strict, ruff, gitleaks, file hygiene
@@ -98,7 +98,12 @@ Five hard stops — see `AGENTS.md` for full details:
 - Plotly visualization adapter with 8 chart functions
 - Pre-computed full-dataset metrics (180K) for dashboard Strategy C
 - Live Streamlit deployment at https://supply-chain-optimization-ml.streamlit.app/
+- Phase 6: Temporal validation (split_strategy param), cost-optimized threshold (0.35), calibration adapter (isotonic), deep-dive notebook with executed findings
+- Model evaluation notebook: temporal split comparison, calibration curve, threshold optimization, error analysis, point-in-time feature engineering
 
-**Planned:**
-
-**All phases complete.** See Phase Status above for full inventory.
+**Key Phase 6 Findings:**
+- Temporal F1=0.6648 vs Random F1=0.6543 (no degradation — temporal stability confirmed)
+- Brier=0.2028 (poor calibration — isotonic adapter created)
+- Threshold 0.35: recall 0.58→0.80 (FN=3x FP cost ratio)
+- Customer history features: zero lift (shipping mode dominates)
+- No segment-specific error bias
