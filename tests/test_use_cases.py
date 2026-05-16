@@ -348,3 +348,79 @@ class TestProfileClustersUseCase:
         cohorts = use_case.execute()
         for c in cohorts:
             assert abs(sum(c.region_distribution.values()) - 1.0) < 0.01
+
+
+class TestTemporalSplit:
+    """Tests for temporal split_strategy in TrainAndEvaluateUseCase."""
+
+    def test_temporal_split_uses_date_ordering(self, temporal_synthetic_orders) -> None:
+        """Temporal split: train set contains earlier orders, test set later."""
+        repo = FakeSalesDataRepository(temporal_synthetic_orders)
+        encoder = FeatureEncoder()
+        model = XGBoostPredictor()
+        tracker = FakeTracker()
+
+        use_case = TrainAndEvaluateUseCase(
+            data_repo=repo,
+            feature_encoder=encoder,
+            model=model,
+            explainer_factory=lambda m, names: ShapExplainer(m.model, names),
+            tracker=tracker,
+        )
+        result = use_case.execute(split_strategy="temporal")
+        assert isinstance(result, TrainingResult)
+        assert 0.0 <= result.metrics.f1 <= 1.0
+
+    def test_temporal_split_logs_strategy_param(
+        self, temporal_synthetic_orders
+    ) -> None:
+        """Verify split_strategy is logged to tracker."""
+        repo = FakeSalesDataRepository(temporal_synthetic_orders)
+        encoder = FeatureEncoder()
+        model = XGBoostPredictor()
+        tracker = FakeTracker()
+
+        use_case = TrainAndEvaluateUseCase(
+            data_repo=repo,
+            feature_encoder=encoder,
+            model=model,
+            explainer_factory=lambda m, names: ShapExplainer(m.model, names),
+            tracker=tracker,
+        )
+        use_case.execute(split_strategy="temporal")
+        assert tracker.params.get("split_strategy") == "temporal"
+
+    def test_random_split_still_works(self, synthetic_orders) -> None:
+        """Default random split behavior unchanged."""
+        repo = FakeSalesDataRepository(synthetic_orders)
+        encoder = FeatureEncoder()
+        model = XGBoostPredictor()
+        tracker = FakeTracker()
+
+        use_case = TrainAndEvaluateUseCase(
+            data_repo=repo,
+            feature_encoder=encoder,
+            model=model,
+            explainer_factory=lambda m, names: ShapExplainer(m.model, names),
+            tracker=tracker,
+        )
+        result = use_case.execute(split_strategy="random")
+        assert isinstance(result, TrainingResult)
+        assert tracker.params.get("split_strategy") == "random"
+
+    def test_invalid_split_strategy_raises(self, synthetic_orders) -> None:
+        """Invalid strategy raises ValueError."""
+        repo = FakeSalesDataRepository(synthetic_orders)
+        encoder = FeatureEncoder()
+        model = XGBoostPredictor()
+        tracker = FakeTracker()
+
+        use_case = TrainAndEvaluateUseCase(
+            data_repo=repo,
+            feature_encoder=encoder,
+            model=model,
+            explainer_factory=lambda m, names: ShapExplainer(m.model, names),
+            tracker=tracker,
+        )
+        with pytest.raises(ValueError, match="split_strategy"):
+            use_case.execute(split_strategy="invalid")
