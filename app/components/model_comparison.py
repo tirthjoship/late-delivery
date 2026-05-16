@@ -112,3 +112,28 @@ def render_model_tab(
         "contribute marginally — the late delivery problem is fundamentally operational, "
         "not transactional."
     )
+
+    # --- Split comparison section ---
+    if use_full and full_metrics and "random_split_comparison" in full_metrics:
+        st.divider()
+        st.subheader("Temporal vs Random Split")
+        st.markdown(
+            "<div class='disclaimer-box'>"
+            "&#x1f4c5; <strong>Temporal split</strong> trains on 2015-2017 orders, "
+            "tests on 2018 orders. More realistic than random stratified split."
+            "</div>",
+            unsafe_allow_html=True,
+        )
+        random_metrics = full_metrics["random_split_comparison"]
+        if "XGBoost" in full_metrics.get("models", {}) and "XGBoost" in random_metrics:
+            temporal_f1 = full_metrics["models"]["XGBoost"]["f1"]
+            random_f1 = random_metrics["XGBoost"]["f1"]
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Temporal F1 (realistic)", f"{temporal_f1:.4f}")
+            with col2:
+                st.metric(
+                    "Random F1 (optimistic)",
+                    f"{random_f1:.4f}",
+                    delta=f"{temporal_f1 - random_f1:.4f}",
+                )
