@@ -424,3 +424,24 @@ class TestTemporalSplit:
         )
         with pytest.raises(ValueError, match="split_strategy"):
             use_case.execute(split_strategy="invalid")
+
+
+def test_predict_uses_cost_optimized_threshold(synthetic_orders) -> None:
+    """Verify PredictSingleOrderUseCase uses cost-optimized default threshold."""
+    from domain.services import extract_features
+
+    raw = [extract_features(o) for o in synthetic_orders]
+    labels = [o.late_delivery_risk for o in synthetic_orders]
+    encoder = FeatureEncoder()
+    X = encoder.fit_transform(raw)
+    model = XGBoostPredictor()
+    model.train(X.values, np.array(labels))
+    explainer = ShapExplainer(model.model, encoder.get_feature_names())
+
+    use_case = PredictSingleOrderUseCase(
+        feature_encoder=encoder,
+        model=model,
+        explainer=explainer,
+    )
+    # Default threshold should be cost-optimized (below 0.5)
+    assert use_case._threshold == 0.35
