@@ -3,12 +3,18 @@
 All fixtures use small synthetic data. Never load the real 180k-row CSV.
 """
 
+import os
 from datetime import datetime
 
 import numpy as np
 import pytest
 
 from domain.models import Order, OrderItem
+
+# Newer mlflow puts the filesystem tracking backend (./mlruns) in maintenance mode and
+# raises unless this is set. Runs before any test module imports mlflow; the backend is
+# checked at call time. Tests use tmp-path file stores; opting in is intentional.
+os.environ.setdefault("MLFLOW_ALLOW_FILE_STORE", "true")
 
 
 def _make_order(
