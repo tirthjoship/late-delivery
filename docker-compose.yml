@@ -1,0 +1,10 @@
+# Run the dashboard locally with: docker compose up --build
+# Then open http://localhost:8501
+services:
+  dashboard:
+    build: .
+    image: supply-chain-optimization-ml:latest
+    container_name: supply-chain-dashboard
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
