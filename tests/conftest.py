@@ -3,12 +3,18 @@
 All fixtures use small synthetic data. Never load the real 180k-row CSV.
 """
 
+import os
 from datetime import datetime
 
 import numpy as np
 import pytest
 
 from domain.models import Order, OrderItem
+
+# Newer mlflow puts the filesystem tracking backend (./mlruns) in maintenance mode and
+# raises unless this is set. Runs before any test module imports mlflow; the backend is
+# checked at call time. Tests use tmp-path file stores; opting in is intentional.
+os.environ.setdefault("MLFLOW_ALLOW_FILE_STORE", "true")
 
 
 def _make_order(
@@ -21,6 +27,7 @@ def _make_order(
     sales: float = 200.0,
     benefit: float = 50.0,
     profit: float = 30.0,
+    order_date: datetime | None = None,
 ) -> Order:
     """Factory for synthetic Order objects."""
     item = OrderItem(
@@ -36,7 +43,7 @@ def _make_order(
     )
     return Order(
         order_id=order_id,
-        order_date=datetime(2024, month, 15),
+        order_date=order_date if order_date is not None else datetime(2024, month, 15),
         order_customer_id=order_id + 1000,
         order_region=region,
         order_country="USA",
@@ -136,3 +143,52 @@ def clustering_numeric_keys() -> list[str]:
         "total_discount",
         "avg_unit_price",
     ]
+
+
+@pytest.fixture
+def temporal_synthetic_orders() -> list[Order]:
+    """100 synthetic orders with dates spanning 2015-2018.
+
+    Ordered chronologically. First 80 are 2015-2017, last 20 are 2018.
+    Used to test temporal split behavior.
+    """
+    rng = np.random.default_rng(42)
+    modes = ["First Class", "Second Class", "Standard Class", "Same Day"]
+    mode_weights = [0.15, 0.20, 0.50, 0.15]
+    regions = ["North America", "Europe", "Asia", "South America"]
+
+    orders = []
+    start_ts = datetime(2015, 1, 1).timestamp()
+    end_ts = datetime(2018, 12, 31).timestamp()
+
+    for i in range(100):
+        mode = rng.choice(modes, p=mode_weights)
+        region = rng.choice(regions)
+        scheduled = int(rng.integers(1, 8))
+        ts = start_ts + (end_ts - start_ts) * (i / 99)
+        order_date = datetime.fromtimestamp(ts)
+
+        if mode == "First Class":
+            late = 1 if rng.random() < 0.95 else 0
+        elif mode == "Second Class":
+            late = 1 if rng.random() < 0.77 else 0
+        elif mode == "Standard Class":
+            late = 1 if rng.random() < 0.38 else 0
+        else:
+            late = 1 if rng.random() < 0.15 else 0
+
+        orders.append(
+            _make_order(
+                order_id=i + 1,
+                shipping_mode=mode,
+                scheduled_days=scheduled,
+                late_risk=late,
+                region=region,
+                month=order_date.month,
+                order_date=order_date,
+                sales=float(rng.uniform(10, 5000)),
+                benefit=float(rng.uniform(-50, 500)),
+                profit=float(rng.uniform(-100, 300)),
+            )
+        )
+    return orders

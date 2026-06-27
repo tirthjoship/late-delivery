@@ -85,6 +85,12 @@ def parse_args() -> argparse.Namespace:
         default="late-delivery-risk",
         help="MLflow experiment name (default: late-delivery-risk)",
     )
+    parser.add_argument(
+        "--split",
+        choices=["random", "temporal"],
+        default="temporal",
+        help="Split strategy: random (stratified) or temporal (date-ordered, default)",
+    )
     return parser.parse_args()
 
 
@@ -94,6 +100,7 @@ def run_experiment(
     model: object,
     tracking_uri: str,
     experiment_name: str,
+    split_strategy: str = "temporal",
 ) -> TrainingResult:
     """Run a single training experiment."""
     repo = DataCoCSVRepository(data_path)
@@ -110,7 +117,7 @@ def run_experiment(
         explainer_factory=lambda m, names: ShapExplainer(m.model, names),
         tracker=tracker,
     )
-    return use_case.execute(run_name=run_name)
+    return use_case.execute(run_name=run_name, split_strategy=split_strategy)
 
 
 def log_result(result: TrainingResult) -> None:
@@ -165,6 +172,7 @@ def main() -> None:
     logger.info("Experiment: {}", args.experiment_name)
     logger.info("Tracking:   {}", args.tracking_uri)
     logger.info("Models:     {}", [c[0] for c in configs])
+    logger.info("Split:      {}", args.split)
     logger.info("=" * 60)
 
     results: list[tuple[str, TrainingResult]] = []
@@ -177,6 +185,7 @@ def main() -> None:
             model=model,
             tracking_uri=args.tracking_uri,
             experiment_name=args.experiment_name,
+            split_strategy=args.split,
         )
         log_result(result)
         results.append((run_name, result))
