@@ -3,11 +3,13 @@ LOCAL_PROJECT_STORY.md
 PRODUCTION_READINESS_AUDIT.md
 .kiro/
 
-# Internal config — keep locally
-.claude/settings.json
-.claude/settings.local.json
-docs/superpowers/plans/
-docs/superpowers/specs/
+# AI assistant scaffolding & internal process docs — keep local, never push
+CLAUDE.md
+AGENTS.md
+MEMORY.md
+.claude/
+docs/superpowers/
+docs/IMPROVEMENT_PLAN.md
 docs/COMPLETION_CHECKLIST.md
 docs/PROJECT_DEEP_DIVE.md
 
