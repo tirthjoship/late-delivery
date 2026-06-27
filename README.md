@@ -67,17 +67,53 @@ Key findings from EDA:
 
 **Primary metric:** F1 score (accuracy is misleading with 55/45 class split)
 
-## So What? — The Business Read
+## So What — The Business Read
 
-**The honest finding: XGBoost adds no meaningful lift over logistic regression** (F1 0.6648 vs 0.6531 on the temporal split). After leakage removal, late delivery is near-deterministic from **shipping mode** alone (First Class 95.3% late, Second Class 76.7%), and SHAP confirms the model simply re-learns that lookup table. Customer-history features added *zero* lift.
+The honest finding: XGBoost adds no meaningful lift over logistic regression (F1 0.6648 vs 0.6531 on the temporal split). After leakage removal, late delivery is near-deterministic from shipping mode alone (First Class 95.3% late, Second Class 76.7%), and SHAP confirms the model re-learns that lookup table. Customer-history features added zero lift.
 
-That is a **valid business conclusion, not a failed project.** The defensible production design is a **shipping-mode rule** for the high-risk tiers plus a model only on the ambiguous **Standard Class** tier where lateness is genuinely uncertain.
+That is a valid business conclusion, not a failed project. The defensible production design is a shipping-mode rule for the high-risk tiers, plus a model only on the ambiguous Standard Class tier where lateness is genuinely uncertain.
 
-- 📉 **[Limitations & Decisions](docs/LIMITATIONS_AND_DECISIONS.md)** — why the rule beats the model, calibration (Brier 0.2028 → isotonic), and the cost-driven threshold (0.35, FN ≈ 3× FP).
-- 💵 **[Business Impact (illustrative)](docs/BUSINESS_IMPACT.md)** — transparent net-value formula with labeled assumptions and a break-even of `C_late × r ≈ $3.87`. No invented ROI.
-- 📊 **[Frozen metrics](reports/model_comparison.json)** — every number above traces to a saved run.
+- [Limitations & Decisions](docs/LIMITATIONS_AND_DECISIONS.md) — why the rule beats the model, calibration (Brier 0.2028, isotonic adapter), and the cost-driven threshold (0.35, FN ~3x FP).
+- [Business Impact (illustrative)](docs/BUSINESS_IMPACT.md) — net-value formula with labeled assumptions and a break-even of `C_late × r ≈ $3.87`. No invented ROI.
+- [Frozen metrics](reports/model_comparison.json) — every number above traces to a saved run.
 
-> *Interview line:* "I shipped a leakage-safe classifier with full MLOps scaffolding, then used SHAP to show a 4-row rule already captures most of the signal — so I recommended the simpler tool. The deliverable was the decision, not the model."
+> Interview line: "I shipped a leakage-safe classifier with full MLOps scaffolding, then used SHAP to show a 4-row rule already captures most of the signal — so I recommended the simpler tool. The deliverable was the decision, not the model."
+
+## Project Journey
+
+How the project moved from a business problem to a shipped decision, with the validation and decision gates that gave the finding its weight.
+
+```mermaid
+flowchart LR
+    P[Business problem<br/>54.8 pct of orders late] --> E[EDA<br/>late rate by shipping mode]
+    E --> L[Leakage-safe pipeline<br/>drop 3 post-shipment cols<br/>split before encode]
+    L --> M[Model bake-off<br/>LogReg vs XGBoost depth sweep]
+    M --> G1{Temporal validation<br/>holds up out of time?}
+    G1 -->|F1 stable, 0.66 vs 0.65| S[SHAP interrogation<br/>what actually drives the score]
+    S --> F[Honest finding<br/>shipping mode near deterministic<br/>XGBoost adds no real lift]
+    F --> G2{Does the model<br/>beat a simple rule?}
+    G2 -->|No, gap within noise| D[Decision<br/>rule for high-risk tiers<br/>model only for Standard Class]
+    D --> SHIP[Shipped<br/>Streamlit dashboard plus<br/>limitations and impact docs]
+```
+
+## Production Decision Logic
+
+What scores each order in production: a deterministic rule on the high-risk shipping modes, and the calibrated model only on the ambiguous Standard Class tier.
+
+```mermaid
+flowchart TD
+    O[Incoming order] --> Q{Shipping mode}
+    Q -->|First Class| R1[Rule: flag high risk<br/>late rate 0.95]
+    Q -->|Second Class| R2[Rule: flag high risk<br/>late rate 0.77]
+    Q -->|Same Day| R3[Rule: flag and monitor<br/>late rate 0.46]
+    Q -->|Standard Class| MOD[Model scores this tier<br/>late rate 0.38, genuinely uncertain]
+    MOD --> T{Calibrated risk<br/>at or above 0.35}
+    T -->|Yes| FLAG[Flag for intervention]
+    T -->|No| OK[Allow to ship]
+    R1 --> FLAG
+    R2 --> FLAG
+    R3 --> FLAG
+```
 
 ## Explainability
 
@@ -105,29 +141,29 @@ All training runs are logged to MLflow with:
 
 ```mermaid
 flowchart LR
-    subgraph Input["📦 Data In"]
-        CSV[DataCo CSV\n180K orders]
+    subgraph Input["Data In"]
+        CSV[DataCo CSV<br/>180K orders]
     end
 
-    subgraph Safety["🛡️ Leakage Shield"]
-        DROP[Drop 3 post-shipment\ncolumns automatically]
+    subgraph Safety["Leakage Shield"]
+        DROP[Drop 3 post-shipment<br/>columns automatically]
     end
 
-    subgraph Pipeline["🔄 ML Pipeline"]
-        FEAT[Extract 12\npre-shipment features]
-        SPLIT[Split FIRST\nthen encode]
-        TRAIN[Train XGBoost\n+ LogReg]
+    subgraph Pipeline["ML Pipeline"]
+        FEAT[Extract 12<br/>pre-shipment features]
+        SPLIT[Split first<br/>then encode]
+        TRAIN[Train XGBoost<br/>plus LogReg]
     end
 
-    subgraph Evaluate["📊 Evaluate & Explain"]
-        EVAL[F1 / Precision\nRecall / AUC-ROC]
-        SHAP[SHAP\nexplainability]
-        MLF[MLflow\ntrack & version]
+    subgraph Evaluate["Evaluate and Explain"]
+        EVAL[F1, Precision<br/>Recall, AUC-ROC]
+        SHAP[SHAP<br/>explainability]
+        MLF[MLflow<br/>track and version]
     end
 
-    subgraph Output["🎯 Outputs"]
-        DASH[Streamlit\nDashboard]
-        REG[Model\nRegistry]
+    subgraph Output["Outputs"]
+        DASH[Streamlit<br/>Dashboard]
+        REG[Model<br/>Registry]
     end
 
     CSV --> DROP --> FEAT --> SPLIT --> TRAIN
@@ -145,13 +181,13 @@ flowchart LR
 ```
 supply-chain-optimization-ml/
 │
-├── 🧠 domain/                       # Business rules (zero external imports)
+├── domain/                          # Business rules (zero external imports)
 │   ├── models.py                    # Order, Product, MetricsResult, RiskCohort
 │   ├── ports.py                     # Interfaces adapters must implement
 │   ├── services.py                  # Feature extraction, risk classification
 │   └── exceptions.py               # Domain-specific errors
 │
-├── 🔌 adapters/                     # External tool integrations
+├── adapters/                        # External tool integrations
 │   ├── data/csv_repository.py       # CSV reader + leakage column shield
 │   ├── ml/feature_encoder.py        # OneHot + StandardScaler encoding
 │   ├── ml/sklearn_predictor.py      # LogReg + XGBoost model wrappers
@@ -161,23 +197,23 @@ supply-chain-optimization-ml/
 │   ├── ml/kmeans_clusterer.py       # K-Means clustering + silhouette
 │   └── visualization/plotly_charts.py  # 8 interactive Plotly charts
 │
-├── 🎯 application/                  # Orchestration layer
+├── application/                     # Orchestration layer
 │   └── use_cases.py                 # Train, Predict, Cluster, Profile
 │
-├── 📱 app/                          # Streamlit dashboard (4 tabs)
+├── app/                             # Streamlit dashboard (4 tabs)
 │   ├── streamlit_app.py             # Entry point + sidebar toggle
 │   └── components/                  # Tab implementations
 │
-├── 🧪 tests/                        # 156 tests, 93% coverage
+├── tests/                           # 156 tests, 93% coverage
 │   ├── test_domain_*.py             # Domain model + service tests
 │   ├── test_ml/                     # Adapter contract tests
 │   ├── test_properties.py           # Hypothesis property-based tests
 │   └── test_visualization/          # Chart output tests
 │
-├── 📓 notebooks/                    # EDA + training narrative
-├── 📜 scripts/train.py              # CLI training entry point
-├── 📊 data/                         # Raw (gitignored) + sample (committed)
-└── ⚙️ .github/workflows/            # CI: lint, test, typecheck, security
+├── notebooks/                       # EDA + training narrative
+├── scripts/train.py                 # CLI training entry point
+├── data/                            # Raw (gitignored) + sample (committed)
+└── .github/workflows/               # CI: lint, test, typecheck, security
 ```
 
 ## Data Leakage Protection
@@ -226,10 +262,10 @@ make app
 # Opens at http://localhost:8501
 ```
 
-- **🔮 Risk Predictor** — Enter order details, get live risk score + SHAP waterfall
-- **📊 Model Results** — Side-by-side LogReg vs XGBoost metrics + SHAP importance
-- **🎯 Customer Segments** — K-Means cluster profiles + PCA scatter
-- **📋 Data Explorer** — Key statistics + shipping mode + region distributions
+- Risk Predictor — Enter order details, get live risk score plus SHAP waterfall
+- Model Results — Side-by-side LogReg vs XGBoost metrics plus SHAP importance
+- Customer Segments — K-Means cluster profiles plus PCA scatter
+- Data Explorer — Key statistics, shipping mode, and region distributions
 
 Sidebar toggle switches between **Full Dataset (180K)** and **Sample (1K)** statistics. Risk Predictor uses sample-trained model for live interactivity.
 
