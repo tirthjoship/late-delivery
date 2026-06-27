@@ -13,6 +13,7 @@
   <a href="#quick-start">Quick Start</a> &bull;
   <a href="#dashboard">Dashboard</a> &bull;
   <a href="#model-comparison">Results</a> &bull;
+  <a href="#so-what--the-business-read">Business</a> &bull;
   <a href="#how-it-works">Architecture</a> &bull;
   <a href="#explainability">Explainability</a> &bull;
   <a href="docs/ARCHITECTURE.md">Design Decisions</a>
@@ -21,8 +22,8 @@
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.12-blue?logo=python&logoColor=white" alt="Python 3.12" />
   <img src="https://img.shields.io/badge/XGBoost-F1%200.65-green?logo=xgboost" alt="XGBoost F1" />
-  <img src="https://img.shields.io/badge/tests-154%20passed-brightgreen?logo=pytest" alt="Tests" />
-  <img src="https://img.shields.io/badge/coverage-92%25-brightgreen" alt="Coverage" />
+  <img src="https://img.shields.io/badge/tests-156%20passed-brightgreen?logo=pytest" alt="Tests" />
+  <img src="https://img.shields.io/badge/coverage-93%25-brightgreen" alt="Coverage" />
   <img src="https://img.shields.io/badge/mypy-strict-blue" alt="mypy strict" />
   <img src="https://img.shields.io/badge/architecture-hexagonal-purple" alt="Hexagonal" />
   <img src="https://img.shields.io/badge/MLflow-experiment%20tracking-blue?logo=mlflow" alt="MLflow" />
@@ -65,6 +66,18 @@ Key findings from EDA:
 | XGBoost (deep, depth=8) | 0.6543 | 0.8452 | 0.5337 | 0.7244 |
 
 **Primary metric:** F1 score (accuracy is misleading with 55/45 class split)
+
+## So What? — The Business Read
+
+**The honest finding: XGBoost adds no meaningful lift over logistic regression** (F1 0.6648 vs 0.6531 on the temporal split). After leakage removal, late delivery is near-deterministic from **shipping mode** alone (First Class 95.3% late, Second Class 76.7%), and SHAP confirms the model simply re-learns that lookup table. Customer-history features added *zero* lift.
+
+That is a **valid business conclusion, not a failed project.** The defensible production design is a **shipping-mode rule** for the high-risk tiers plus a model only on the ambiguous **Standard Class** tier where lateness is genuinely uncertain.
+
+- 📉 **[Limitations & Decisions](docs/LIMITATIONS_AND_DECISIONS.md)** — why the rule beats the model, calibration (Brier 0.2028 → isotonic), and the cost-driven threshold (0.35, FN ≈ 3× FP).
+- 💵 **[Business Impact (illustrative)](docs/BUSINESS_IMPACT.md)** — transparent net-value formula with labeled assumptions and a break-even of `C_late × r ≈ $3.87`. No invented ROI.
+- 📊 **[Frozen metrics](reports/model_comparison.json)** — every number above traces to a saved run.
+
+> *Interview line:* "I shipped a leakage-safe classifier with full MLOps scaffolding, then used SHAP to show a 4-row rule already captures most of the signal — so I recommended the simpler tool. The deliverable was the decision, not the model."
 
 ## Explainability
 
@@ -155,7 +168,7 @@ supply-chain-optimization-ml/
 │   ├── streamlit_app.py             # Entry point + sidebar toggle
 │   └── components/                  # Tab implementations
 │
-├── 🧪 tests/                        # 140+ tests, 92% coverage
+├── 🧪 tests/                        # 156 tests, 93% coverage
 │   ├── test_domain_*.py             # Domain model + service tests
 │   ├── test_ml/                     # Adapter contract tests
 │   ├── test_properties.py           # Hypothesis property-based tests
@@ -222,7 +235,7 @@ Sidebar toggle switches between **Full Dataset (180K)** and **Sample (1K)** stat
 
 ## Quality
 
-- **140+ tests** at 92% coverage (90% gate enforced in CI)
+- **156 tests** at 93% coverage (90% gate enforced in CI)
 - **mypy strict** — full type safety across domain, adapters, application
 - **Pre-commit hooks** — black, isort, ruff, mypy, gitleaks
 - **Property-based testing** — Hypothesis for domain invariants

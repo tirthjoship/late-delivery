@@ -6,7 +6,6 @@ Pure Python only — no pandas, numpy, or other external dependencies.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
 
 
 @dataclass(frozen=True)
@@ -104,7 +103,7 @@ class Order:
     """Order-level profit."""
     items: list[OrderItem] = field(default_factory=list)
     """Line items for this order."""
-    late_delivery_risk: Optional[int] = None
+    late_delivery_risk: int | None = None
     """Binary target (0/1) when labels are present; None if unknown."""
 
 
