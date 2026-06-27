@@ -269,6 +269,24 @@ make app
 
 Sidebar toggle switches between **Full Dataset (180K)** and **Sample (1K)** statistics. Risk Predictor uses sample-trained model for live interactivity.
 
+### Run with Docker
+
+The dashboard is containerized for a one-command, dependency-free run. The image bundles the 1K sample and pre-computed full-dataset metrics; the full 180K CSV is never baked in.
+
+```bash
+docker compose up --build
+# Open http://localhost:8501
+```
+
+Or without Compose:
+
+```bash
+docker build -t supply-chain-optimization-ml .
+docker run --rm -p 8501:8501 supply-chain-optimization-ml
+```
+
+The image runs as a non-root user and exposes Streamlit's `/_stcore/health` endpoint for container health checks.
+
 ## Quality
 
 - **156 tests** at 93% coverage (90% gate enforced in CI)
@@ -288,6 +306,7 @@ Sidebar toggle switches between **Full Dataset (180K)** and **Sample (1K)** stat
 | Testing | pytest, Hypothesis, pytest-cov |
 | Quality | mypy strict, black, isort, ruff, gitleaks |
 | CI/CD | GitHub Actions (3 workflows) |
+| Deployment | Streamlit Cloud, Docker (Compose) |
 
 ## Dataset
 
