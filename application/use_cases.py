@@ -48,7 +48,6 @@ class TrainAndEvaluateUseCase:
         self,
         test_size: float = 0.2,
         random_state: int = 42,
-        risk_threshold: float = 0.5,
         run_name: str | None = None,
         split_strategy: str = "random",
     ) -> TrainingResult:
