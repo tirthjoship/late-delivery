@@ -1,0 +1,50 @@
+# Version control
+.git
+.gitignore
+
+# Raw / intermediate data — only the committed sample + metrics are needed at runtime
+data/raw
+data/interim
+data/processed
+
+# MLflow tracking store — not needed to serve the dashboard
+mlruns
+mlartifacts
+mlflow.db
+
+# Python caches and build artifacts
+__pycache__
+*.py[cod]
+*.egg-info
+.eggs
+build
+dist
+.mypy_cache
+.ruff_cache
+.pytest_cache
+.hypothesis
+.coverage
+
+# Notebooks and their checkpoints — analysis only, not served
+notebooks
+.ipynb_checkpoints
+
+# Tests are not part of the runtime image
+tests
+
+# Local-only tooling and process docs (kitchen, not dining room)
+.claude
+.devcontainer
+docs/superpowers
+docs/IMPROVEMENT_PLAN.md
+docs/COMPLETION_CHECKLIST.md
+docs/PROJECT_DEEP_DIVE.md
+LOCAL_PROJECT_STORY.md
+PRODUCTION_READINESS_AUDIT.md
+environment.yml
+
+# Editor / OS noise
+.DS_Store
+.env
+.venv
+env

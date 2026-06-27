@@ -36,12 +36,6 @@
   </a>
 </p>
 
-<!-- Demo GIFs — uncomment after recording
-<p align="center">
-  <img src="assets/streamlit-demo.gif" alt="Streamlit Dashboard Demo" width="700" />
-</p>
--->
-
 ---
 
 Late delivery risk prediction for e-commerce orders using hexagonal architecture, XGBoost with SHAP explainability, and MLflow experiment tracking.
@@ -255,6 +249,14 @@ make test     # tests only
 
 ## Dashboard
 
+<!-- Demo GIF — uncomment the block below after recording assets/streamlit-demo.gif
+<p align="center">
+  <img src="assets/streamlit-demo.gif" alt="Dashboard walkthrough" width="760" />
+</p>
+-->
+
+A 90-second walkthrough follows the project's story end to end: score a single order and read its SHAP waterfall in the **Risk Predictor**, compare LogReg vs XGBoost in **Model Results** (the honest "no meaningful lift" finding), browse K-Means cohorts in **Customer Segments**, and toggle the sidebar between the 1K sample and full 180K dataset in **Data Explorer**.
+
 Interactive Streamlit dashboard with 4 tabs:
 
 ```bash
@@ -268,6 +270,24 @@ make app
 - Data Explorer — Key statistics, shipping mode, and region distributions
 
 Sidebar toggle switches between **Full Dataset (180K)** and **Sample (1K)** statistics. Risk Predictor uses sample-trained model for live interactivity.
+
+### Run with Docker
+
+The dashboard is containerized for a one-command, dependency-free run. The image bundles the 1K sample and pre-computed full-dataset metrics; the full 180K CSV is never baked in.
+
+```bash
+docker compose up --build
+# Open http://localhost:8501
+```
+
+Or without Compose:
+
+```bash
+docker build -t supply-chain-optimization-ml .
+docker run --rm -p 8501:8501 supply-chain-optimization-ml
+```
+
+The image runs as a non-root user and exposes Streamlit's `/_stcore/health` endpoint for container health checks.
 
 ## Quality
 
@@ -288,6 +308,7 @@ Sidebar toggle switches between **Full Dataset (180K)** and **Sample (1K)** stat
 | Testing | pytest, Hypothesis, pytest-cov |
 | Quality | mypy strict, black, isort, ruff, gitleaks |
 | CI/CD | GitHub Actions (3 workflows) |
+| Deployment | Streamlit Cloud, Docker (Compose) |
 
 ## Dataset
 
