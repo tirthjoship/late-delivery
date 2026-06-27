@@ -1,0 +1,78 @@
+{
+  "_meta": {
+    "purpose": "Frozen model comparison artifact for portfolio review. Every number traces to a saved training run.",
+    "source_run": "data/metrics/full_run_metrics.json",
+    "experiment_tracking": "mlflow.db (sqlite) — full hyperparameter sweep, including XGBoost depth variants, logged as MLflow runs",
+    "dataset": "DataCo Smart Supply Chain — 180,519 order line items / 65,752 orders",
+    "target": "late_delivery (1 = delivered late, 0 = on-time)",
+    "base_late_rate": 0.5482,
+    "primary_metric": "F1 (55/45 class split makes accuracy misleading)",
+    "leakage_columns_excluded": [
+      "Days for shipping (real)",
+      "Delivery Status",
+      "shipping date (DateOrders)"
+    ],
+    "frozen_on": "2026-06-26"
+  },
+  "splits": {
+    "temporal": {"train_size": 144415, "test_size": 36104, "note": "Headline split — orders sorted by date, train on past / test on future."},
+    "random": {"note": "Stratified random split used only to confirm temporal stability."}
+  },
+  "models": {
+    "logistic_regression": {
+      "role": "baseline",
+      "split": "temporal",
+      "f1": 0.6531,
+      "precision": 0.8515,
+      "recall": 0.5297,
+      "auc_roc": 0.7241,
+      "confusion_matrix": [[5275, 666], [3391, 3819]],
+      "top_features": {
+        "days_for_shipment_scheduled": 0.3883,
+        "shipping_mode_Standard Class": 0.3534,
+        "shipping_mode_First Class": 0.2947,
+        "shipping_mode_Second Class": 0.0912,
+        "shipping_mode_Same Day": 0.0812
+      }
+    },
+    "xgboost_default_temporal": {
+      "role": "candidate",
+      "split": "temporal",
+      "max_depth": 6,
+      "f1": 0.6648,
+      "precision": 0.7743,
+      "recall": 0.5825,
+      "auc_roc": 0.7233,
+      "_confusion_matrix_note": "The confusion_matrix stored under this key in data/metrics/full_run_metrics.json ([[5234,707],[3361,3849]]) reconciles to precision 0.8448 / recall 0.5338 — i.e. it is the RANDOM-split matrix, not the temporal one. The scalar precision/recall/F1 above are internally consistent (2PR/(P+R)=0.6648) and are authoritative for the temporal split. CM omitted here to avoid propagating the mislabel.",
+      "top_features": {
+        "shipping_mode_Standard Class": 0.6160,
+        "shipping_mode_First Class": 0.4318,
+        "shipping_mode_Second Class": 0.1344,
+        "shipping_mode_Same Day": 0.0748,
+        "sales_per_customer": 0.0541
+      }
+    },
+    "xgboost_default_random": {
+      "role": "stability_check",
+      "split": "random",
+      "max_depth": 6,
+      "f1": 0.6543,
+      "precision": 0.8448,
+      "recall": 0.5338,
+      "auc_roc": 0.7233,
+      "note": "Random-split result reported in README comparison table. Close to temporal F1 (0.6648) — confirms no temporal degradation."
+    }
+  },
+  "calibration": {
+    "brier_score": 0.2028,
+    "note": "Poorly calibrated out of the box; isotonic calibration adapter added (Phase 6)."
+  },
+  "operating_point": {
+    "default_threshold": 0.5,
+    "chosen_threshold": 0.35,
+    "rationale": "False negatives (missed late order) cost ~3x a false positive (unneeded review). Lowering threshold to 0.35 raises recall from ~0.58 to ~0.80.",
+    "recall_at_default": 0.58,
+    "recall_at_0_35": 0.80
+  },
+  "headline_finding": "XGBoost adds no meaningful lift over logistic regression (F1 0.6648 vs 0.6531). Both models concentrate importance on shipping_mode, which the EDA shows is near-deterministic of lateness (First Class 95.3% late, Second Class 76.7%). The defensible production answer is a shipping-mode rule plus a model only for the ambiguous Standard Class tier. See docs/LIMITATIONS_AND_DECISIONS.md."
+}
