@@ -36,12 +36,6 @@
   </a>
 </p>
 
-<!-- Demo GIFs — uncomment after recording
-<p align="center">
-  <img src="assets/streamlit-demo.gif" alt="Streamlit Dashboard Demo" width="700" />
-</p>
--->
-
 ---
 
 Late delivery risk prediction for e-commerce orders using hexagonal architecture, XGBoost with SHAP explainability, and MLflow experiment tracking.
@@ -254,6 +248,14 @@ make test     # tests only
 ```
 
 ## Dashboard
+
+<!-- Demo GIF — uncomment the block below after recording assets/streamlit-demo.gif
+<p align="center">
+  <img src="assets/streamlit-demo.gif" alt="Dashboard walkthrough" width="760" />
+</p>
+-->
+
+A 90-second walkthrough follows the project's story end to end: score a single order and read its SHAP waterfall in the **Risk Predictor**, compare LogReg vs XGBoost in **Model Results** (the honest "no meaningful lift" finding), browse K-Means cohorts in **Customer Segments**, and toggle the sidebar between the 1K sample and full 180K dataset in **Data Explorer**.
 
 Interactive Streamlit dashboard with 4 tabs:
 
