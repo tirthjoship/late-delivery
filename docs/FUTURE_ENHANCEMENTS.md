@@ -1,9 +1,9 @@
 # Future Enhancements — Decision-Science Horizon
 
 **Date:** 2026-06-11
-**Status:** Roadmap (post-`IMPROVEMENT_PLAN.md` P0/P1 polish; nothing here blocks job applications)
-**Portfolio context:** This roadmap is deliberately scoped so this project and
-`product-experimentation-analytics` never overlap. The two own different problems and methods:
+**Status:** Roadmap — optional depth beyond the shipped model and docs.
+**Scope guard:** This roadmap is deliberately scoped so this project and the companion
+experimentation project never overlap. The two own different problems and methods:
 
 | | This project (supply-chain-ml) | product-experimentation-analytics |
 |---|---|---|
@@ -62,8 +62,8 @@ frontier.
 | Item | Why |
 |---|---|
 | Uplift modeling / causal what-ifs | Portfolio-separation hard rule above |
-| Demand forecasting | Already deferred in `IMPROVEMENT_PLAN.md` — DataCo too weak for time series |
-| New dataset | Rejected in `IMPROVEMENT_PLAN.md` — polish narrative instead |
+| Demand forecasting | Deferred — DataCo too weak for time series |
+| New dataset | Rejected — polish the narrative instead |
 | Deep models / AutoML sweep | Shipping-mode dominance means ceiling is data-limited; more model
   won't move it, and the honest-conclusion narrative is the asset |
 
