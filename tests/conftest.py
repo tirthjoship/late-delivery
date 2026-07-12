@@ -1,4 +1,4 @@
-"""Shared test fixtures for supply-chain-optimization-ml.
+"""Shared test fixtures for late-delivery-risk-prediction.
 
 All fixtures use small synthetic data. Never load the real 180k-row CSV.
 """

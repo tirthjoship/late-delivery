@@ -1,4 +1,4 @@
-# Supply Chain Late Delivery Risk — Streamlit dashboard image.
+# Late Delivery Risk Prediction — Streamlit dashboard image.
 # Serves the 4-tab dashboard against the committed 1K sample and pre-computed
 # full-dataset metrics. The full 180K CSV is never baked in (see .dockerignore).
 

@@ -1,73 +1,34 @@
-# Future Enhancements — Decision-Science Horizon
+# Future Enhancements — Optional Depth
 
-**Date:** 2026-06-11
-**Status:** Roadmap — optional depth beyond the shipped model and docs.
-**Scope guard:** This roadmap is deliberately scoped so this project and the companion
-experimentation project never overlap. The two own different problems and methods:
-
-| | This project (supply-chain-ml) | product-experimentation-analytics |
-|---|---|---|
-| Problem space | Operations / logistics / freight | Customer / payments / product levers |
-| Core method | Predictive ML + cost-based operating decisions + MLOps | Controlled experiments + causal inference + PM judgment |
-| Decision artifact | Operating policy (threshold, carrier rule) | Experiment readout / decision memo |
-
-**Hard rule:** no causal-inference or uplift work in this repo (no "would upgrading shipping
-class X→Y *cause* fewer lates?"). Causal methods are the other project's identity; duplicating
-them dilutes both. Likewise, the experimentation project stays out of freight/logistics.
+**Status:** Optional follow-ons beyond what is already shipped and documented.
+**Not a gap list.** Calibration measurement (Brier 0.2028), an ops threshold (0.35), and the rule-vs-model recommendation are already in the repo. Items below are *extensions*, not unfinished core work.
 
 ---
 
-## E1 — Cost-sensitive thresholding (highest value, do first)
+## Portfolio separation (hard rule)
 
-**Problem it fixes:** the honest "XGBoost F1 0.654 ≈ LogReg 0.653" conclusion currently reads as
-"ML didn't help." Cost-sensitive operating-point selection turns the same frozen model into a
-business answer: *which threshold minimizes expected cost?*
+This project owns **operations / logistics late-delivery risk** (predictive ML + operating-point decisions + MLOps).
+Causal / uplift / product-experimentation work belongs in a separate portfolio project — do not duplicate either way.
 
-- Define `cost_fp` (needless expediting/review of an on-time order) and `cost_fn` (late order
-  reaches customer) as **labeled assumptions** in `docs/BUSINESS_IMPACT.md` — never invented as
-  facts; show the conclusion across a cost-ratio grid (e.g. 1:2 → 1:10) so no single guess is
-  load-bearing.
-- Sweep thresholds on the frozen validation predictions (`reports/model_comparison.json` run);
-  pick `argmin(FP×cost_fp + FN×cost_fn)`; compare against the rule-based baseline
-  (First/Second Class flag) under the same cost model.
-- Artifact: `reports/cost_threshold_analysis.{md,json}` + expected-cost-vs-threshold curve.
-- Interview line: "max-F1 is the wrong objective; I picked the operating point that minimizes
-  expected cost, and showed when the simple rule is still cheaper."
+---
 
-## E2 — Probability calibration (prerequisite for E1's curve being trustworthy)
+## Optional extensions
 
-Reliability curve + Brier score for LogReg and XGBoost; isotonic/Platt recalibration if needed.
-Expected-cost math in E1 assumes predicted probabilities mean something — measure that first.
-Artifact: calibration plot + short note in `docs/` (extends the P1 calibration item).
-
-## E3 — Drift monitoring & retraining trigger (MLOps credential)
-
-Design, don't over-build: PSI/KS on the top SHAP features + label-rate tracking, alert
-thresholds, and a written retraining policy (what drift level triggers what action). Simulate by
-splitting DataCo by time and showing the monitor firing on a known shift. Artifact:
-`docs/DRIFT_MONITORING.md` + a small `monitoring/` module with fixture-tested checks.
-No counterpart exists in any other portfolio project.
-
-## E4 — Carrier-assignment optimizer (finally justifies "optimization" in the repo name)
-
-Prescriptive layer on top of the predictor: assign shipping mode per order to minimize total
-shipping cost subject to a late-risk budget (predicted P(late) ≤ threshold per segment).
-Linear programming (PuLP/OR-Tools) or a transparent greedy heuristic — compare both.
-Freight/logistics optimization lives HERE, which is exactly why the experimentation project
-dropped its free-shipping framing. Artifact: `reports/carrier_optimization.md` with cost-vs-risk
-frontier.
+| ID | Idea | Why it is optional | Notes |
+|----|------|--------------------|-------|
+| E1 | Publish a full cost-threshold artifact (`reports/cost_threshold_analysis.*`) | Sweep already run in the deep-dive notebook; freeze as a standalone report | Ops point 0.35 and pure cost-opt 0.05 are already in `model_comparison.json` |
+| E2 | Wire isotonic calibration into train + serving | Adapter exists and is tested; pipeline intentionally left uncalibrated for now | Documented in `ARCHITECTURE.md` / `LIMITATIONS` |
+| E3 | Drift monitoring design (PSI/KS + retraining policy) | MLOps credential; not required for the decision narrative | Design doc + small `monitoring/` module if pursued |
+| E4 | Prescriptive carrier / mode assignment under a late-risk budget | Would add a true optimization layer on top of the predictor | Explicitly *out of scope* for the current portfolio story |
 
 ## Explicitly rejected / deferred
 
 | Item | Why |
 |---|---|
-| Uplift modeling / causal what-ifs | Portfolio-separation hard rule above |
-| Demand forecasting | Deferred — DataCo too weak for time series |
-| New dataset | Rejected — polish the narrative instead |
-| Deep models / AutoML sweep | Shipping-mode dominance means ceiling is data-limited; more model
-  won't move it, and the honest-conclusion narrative is the asset |
+| Uplift modeling / causal what-ifs | Portfolio-separation hard rule |
+| Demand forecasting | DataCo too weak for credible time series; not this project's identity |
+| Deep models / AutoML sweep | Shipping-mode dominance means the ceiling is data-limited |
 
-## Suggested order
+---
 
-E2 → E1 (calibration feeds cost curve) → E3 → E4. Each is its own spec → plan → PR cycle;
-none requires touching the frozen model comparison.
+*Shipped decision narrative: [`LIMITATIONS_AND_DECISIONS.md`](./LIMITATIONS_AND_DECISIONS.md) · [`BUSINESS_IMPACT.md`](./BUSINESS_IMPACT.md) · [`reports/model_comparison.json`](../reports/model_comparison.json)*
