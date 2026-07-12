@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "retail_supply_chain"
 version = "0.1.0"
-description = "Retail Supply Chain Optimization - demand forecasting and inventory policy"
+description = "Late delivery risk prediction for e-commerce orders (DataCo) — leakage-safe ML, SHAP, Streamlit"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

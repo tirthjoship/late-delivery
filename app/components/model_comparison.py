@@ -106,11 +106,11 @@ def render_model_tab(
 
     # --- Key insight callout (replaces SHAP dependence plot) ---
     st.info(
-        "**Key Insight:** Shipping mode alone explains ~85% of prediction variance. "
-        "First Class (SHAP: +0.43) and Standard Class (SHAP: -0.62) are the dominant "
-        "signals. Non-shipping features like `sales_per_customer` and `total_discount` "
-        "contribute marginally — the late delivery problem is fundamentally operational, "
-        "not transactional."
+        "**Key Insight:** Shipping mode accounts for ~73% of mean |SHAP| on the "
+        "temporal test set. First Class and Standard Class dummies dominate; "
+        "non-shipping features like `sales_per_customer` and `total_discount` "
+        "contribute marginally — the late delivery problem is fundamentally "
+        "operational, not transactional."
     )
 
     # --- Split comparison section ---
