@@ -70,10 +70,11 @@ SHAP confirms the model learned exactly this — the top features for XGBoost ar
 
 ## 5. Calibration & operating point
 
-- Out-of-the-box XGBoost is **poorly calibrated** (Brier = 0.2028). An isotonic calibration adapter was added (Phase 6) so predicted probabilities can be read as risk.
-- The operating **threshold is set to 0.35, not 0.5**, because a missed late order (false negative) is treated as ~3× costlier than an unnecessary review (false positive). This raises recall from ~0.58 to ~0.80.
+- Out-of-the-box XGBoost is **poorly calibrated** (Brier = 0.2028). An isotonic `CalibratedModelAdapter` was added and unit-tested, but it is **not wired** into `train.py` or the Streamlit serving path — live scores are uncalibrated probabilities.
+- A pure expected-cost sweep under FN ≈ 3× FP picks threshold **0.05** (recall 1.0, flag rate 1.0) — flag everything. That minimizes the toy cost function but is operationally useless.
+- The demo / default serving threshold is **0.35** (ops compromise): measured recall **0.8013**, precision **0.6145**, flag rate ≈ **0.72** on the temporal test set ([`reports/model_comparison.json`](../reports/model_comparison.json)).
 
-**Decision:** Document the cost asymmetry explicitly rather than defaulting to 0.5; the threshold is a business choice, not a modelling one.
+**Decision:** Document the cost asymmetry and the ops compromise explicitly. Do not call 0.35 "cost-optimal" — that label belongs to 0.05 under the toy cost model.
 
 ---
 
@@ -92,7 +93,7 @@ Even though the model doesn't beat the rule, the work demonstrates exactly what 
 
 - **Leakage control** as a first-class concern, enforced in code and tests.
 - **Leakage-safe, temporally-validated** evaluation with the right metric (F1, not accuracy).
-- **Calibration awareness** and a cost-driven operating point.
+- **Calibration awareness** (Brier documented; adapter available) and an explicitly chosen ops threshold (0.35), not a silent 0.5 default.
 - **Explainability** (global + local SHAP) used to *interrogate* the model, which is how the shipping-mode dominance was caught.
 - **Production scaffolding**: hexagonal architecture, MLflow tracking + registry, 156 tests at 93% coverage, CI, a live Streamlit dashboard.
 - **The judgement to recommend the simpler tool** when the data says so.

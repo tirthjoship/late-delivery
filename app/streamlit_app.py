@@ -1,4 +1,4 @@
-"""Streamlit app — Supply Chain Late Delivery Risk Dashboard.
+"""Streamlit app — Late Delivery Risk Prediction dashboard.
 
 4 tabs: Risk Predictor, Model Results, Customer Segments, Data Explorer.
 Sidebar toggle switches stats tabs between sample (1K) and full (180K) data.
@@ -39,7 +39,7 @@ from domain.models import RiskCohort  # noqa: E402
 from domain.ports import ExperimentTrackerPort  # noqa: E402
 
 # ---------------------------------------------------------------------------
-# Custom CSS
+# Custom CSS — tuned for light theme
 # ---------------------------------------------------------------------------
 _CUSTOM_CSS = """
 <style>
@@ -51,8 +51,8 @@ _CUSTOM_CSS = """
 
     /* Metric cards */
     [data-testid="stMetric"] {
-        background-color: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: #F0F2F6;
+        border: 1px solid #E0E4EA;
         border-radius: 8px;
         padding: 12px 16px;
     }
@@ -61,22 +61,22 @@ _CUSTOM_CSS = """
 
     /* Disclaimer boxes */
     .disclaimer-box {
-        background-color: rgba(255, 255, 255, 0.04);
+        background-color: #F7F8FA;
         border-left: 3px solid #4A9EFF;
         padding: 8px 14px;
         border-radius: 4px;
         font-size: 0.82rem;
         margin-bottom: 1rem;
-        opacity: 0.85;
+        opacity: 0.95;
     }
     .disclaimer-box.warn {
-        border-left-color: #FFB84D;
+        border-left-color: #E09B3D;
     }
 
     /* Impact card */
     .impact-card {
-        background: linear-gradient(135deg, rgba(74,158,255,0.08), rgba(255,107,107,0.08));
-        border: 1px solid rgba(255,255,255,0.08);
+        background: #F7F8FA;
+        border: 1px solid #E0E4EA;
         border-radius: 12px;
         padding: 20px 24px;
         margin-bottom: 1.5rem;
@@ -88,7 +88,7 @@ _CUSTOM_CSS = """
 
     /* Sidebar styling */
     [data-testid="stSidebar"] [data-testid="stMetric"] {
-        background-color: rgba(255,255,255,0.03);
+        background-color: #FFFFFF;
     }
 </style>
 """
@@ -229,9 +229,10 @@ def load_pipeline() -> dict[str, Any]:
 def main() -> None:
     """Render the Streamlit dashboard."""
     st.set_page_config(
-        page_title="Supply Chain Risk Dashboard",
-        page_icon="🚚",
+        page_title="Late Delivery Risk Prediction",
+        page_icon="📦",
         layout="wide",
+        initial_sidebar_state="expanded",
     )
     st.markdown(_CUSTOM_CSS, unsafe_allow_html=True)
 
@@ -262,7 +263,7 @@ def main() -> None:
         st.markdown(
             "<div style='font-size: 0.75rem; opacity: 0.5;'>"
             "Built by Tirth Joshi<br>"
-            "<a href='https://github.com/tirthjoship/supply-chain-optimization-ml' "
+            "<a href='https://github.com/tirthjoship/late-delivery-risk-prediction' "
             "style='color: inherit;'>View on GitHub</a>"
             "</div>",
             unsafe_allow_html=True,
@@ -275,7 +276,7 @@ def main() -> None:
     # --- Hero (shows immediately while pipeline trains) ---
     st.markdown(
         "<h1 style='text-align: center; margin-bottom: 0;'>"
-        "🚚 Supply Chain Late Delivery Risk</h1>",
+        "Late Delivery Risk Prediction</h1>",
         unsafe_allow_html=True,
     )
     st.markdown(
@@ -299,9 +300,10 @@ enabling logistics teams to reroute, prioritize, or proactively notify customers
 <p style="margin-bottom: 0;">
 An end-to-end ML pipeline with <strong>XGBoost + SHAP explainability</strong>,
 <strong>MLflow experiment tracking</strong>, and <strong>hexagonal architecture</strong>
-for production-grade code structure. The model achieves <strong>F1 = 0.6543</strong>
-with <strong>84.5% precision</strong> — when it flags an order as late, it's right
-5 out of 6 times. Shipping mode alone explains 85% of prediction variance.
+for production-grade code structure. On the temporal split the model reaches
+<strong>F1 = 0.6648</strong> (precision 0.7743 / recall 0.5825 at threshold 0.5).
+Shipping mode accounts for ~73% of mean |SHAP| — the model largely re-learns
+a shipping-mode lookup table.
 </p>
 </div>""",
         unsafe_allow_html=True,
@@ -336,7 +338,7 @@ that would leak the answer.
 | Explainability | SHAP |
 | Tracking | MLflow |
 | Architecture | Hexagonal |
-| Testing | 154 tests, 92% cov |
+| Testing | 156 tests, 93% cov |
 | Type Safety | mypy strict |
 | Dashboard | Streamlit |
                 """
@@ -395,7 +397,7 @@ that would leak the answer.
     st.markdown(
         "<div style='text-align: center; opacity: 0.4; font-size: 0.78rem;'>"
         "Streamlit · XGBoost · SHAP · MLflow · Hexagonal Architecture · "
-        "<a href='https://github.com/tirthjoship/supply-chain-optimization-ml' "
+        "<a href='https://github.com/tirthjoship/late-delivery-risk-prediction' "
         "style='color: inherit;'>GitHub</a></div>",
         unsafe_allow_html=True,
     )
