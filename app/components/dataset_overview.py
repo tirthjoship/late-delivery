@@ -129,7 +129,7 @@ def render_dataset_tab(
 - Train/test split BEFORE encoding
 - Encoder fitted on training data ONLY
 - Property-based tests verify no leakage
-- 154 tests, 92% code coverage
+- 156 tests, 93% code coverage
             """
         )
 

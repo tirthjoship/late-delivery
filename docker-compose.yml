@@ -3,8 +3,8 @@
 services:
   dashboard:
     build: .
-    image: supply-chain-optimization-ml:latest
-    container_name: supply-chain-dashboard
+    image: late-delivery-risk-prediction:latest
+    container_name: late-delivery-risk-dashboard
     ports:
       - "8501:8501"
     restart: unless-stopped

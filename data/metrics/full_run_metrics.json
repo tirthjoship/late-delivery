@@ -1,10 +1,24 @@
 {
-  "dataset": "DataCo Supply Chain (180,519 orders)",
-  "train_size": 144415,
-  "test_size": 36104,
+  "dataset": "DataCo Supply Chain — 180,519 line items / 65,752 orders",
+  "unit_of_modeling": "order",
+  "train_size": 52601,
+  "test_size": 13151,
   "split_strategy": "temporal",
   "random_split_comparison": {
-    "XGBoost": {"f1": 0.6543, "precision": 0.8448, "recall": 0.5338, "auc_roc": 0.7233}
+    "XGBoost": {
+      "f1": 0.6543,
+      "precision": 0.8448,
+      "recall": 0.5338,
+      "auc_roc": 0.7233
+    }
+  },
+  "operating_point": {
+    "chosen_threshold": 0.35,
+    "recall_at_0_35": 0.8013,
+    "precision_at_0_35": 0.6145,
+    "flag_rate_at_0_35": 0.7167,
+    "pure_cost_opt_threshold": 0.05,
+    "note": "0.35 is ops compromise; 0.05 is pure cost-opt under FN=3×FP (flags all)."
   },
   "models": {
     "LogisticRegression": {
@@ -31,7 +45,7 @@
       "precision": 0.7743,
       "recall": 0.5825,
       "auc_roc": 0.7233,
-      "confusion_matrix": [[5234, 707], [3361, 3849]],
+      "confusion_matrix": [[4696, 1227], [3018, 4210]],
       "feature_importances": {
         "shipping_mode_Standard Class": 0.616,
         "shipping_mode_First Class": 0.4318,

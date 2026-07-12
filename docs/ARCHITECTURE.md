@@ -64,8 +64,8 @@ adapters/     →  domain/  ←  application/
 | Testing | pytest + Hypothesis | Property-based catches edge cases | unittest |
 | Data source toggle | Strategy C hybrid | Full metrics + live sample predictions | All-sample or all-full |
 | Temporal split | Default for training | No temporal degradation found; temporal is more realistic evaluation | Random-only |
-| Threshold | Cost-optimized (0.35) | FN costs 3x FP in supply chain; recall 0.58→0.80 at acceptable precision cost | Fixed 0.5 |
-| Calibration | Isotonic post-hoc | Brier=0.2028 showed poor calibration; adapter created but pipeline unchanged | Always calibrate |
+| Threshold | Ops compromise (0.35) | Pure cost-opt under FN=3×FP is 0.05 (flags all); 0.35 raises recall 0.58→0.80 at flag_rate ≈0.72 | Fixed 0.5 |
+| Calibration | Adapter exists, not wired | Brier=0.2028 showed poor calibration; `CalibratedModelAdapter` unit-tested; train/app still use raw probabilities | Always calibrate in serving |
 | Feature V2 | Explored, not promoted | Point-in-time customer features showed zero lift; shipping mode dominates | Naive features |
 | Error analysis | Notebook exploration | No systematic segment bias found; errors uniformly distributed | Dashboard tab |
 

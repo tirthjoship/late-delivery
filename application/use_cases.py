@@ -177,7 +177,7 @@ class PredictSingleOrderUseCase:
         feature_encoder: FeatureEncoder,
         model: ModelTrainerPort,
         explainer: Any,
-        risk_threshold: float = 0.35,  # Cost-optimized: FN=3x FP
+        risk_threshold: float = 0.35,  # Ops compromise (FN≈3×FP); pure cost-opt is 0.05
     ) -> None:
         self._encoder = feature_encoder
         self._model = model

@@ -426,8 +426,8 @@ class TestTemporalSplit:
             use_case.execute(split_strategy="invalid")
 
 
-def test_predict_uses_cost_optimized_threshold(synthetic_orders) -> None:
-    """Verify PredictSingleOrderUseCase uses cost-optimized default threshold."""
+def test_predict_uses_ops_compromise_threshold(synthetic_orders) -> None:
+    """Verify PredictSingleOrderUseCase default threshold is 0.35 (ops compromise)."""
     from domain.services import extract_features
 
     raw = [extract_features(o) for o in synthetic_orders]
@@ -443,5 +443,5 @@ def test_predict_uses_cost_optimized_threshold(synthetic_orders) -> None:
         model=model,
         explainer=explainer,
     )
-    # Default threshold should be cost-optimized (below 0.5)
+    # Default threshold should be ops compromise 0.35 (below 0.5)
     assert use_case._threshold == 0.35

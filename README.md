@@ -1,9 +1,9 @@
 <!-- Banner placeholder — replace with your custom banner image -->
 <!-- <p align="center">
-  <img src="assets/banner.png" alt="Supply Chain Late Delivery Risk Prediction" width="900" />
+  <img src="assets/banner.png" alt="Late Delivery Risk Prediction" width="900" />
 </p> -->
 
-<h1 align="center">Supply Chain Late Delivery Risk Prediction</h1>
+<h1 align="center">Late Delivery Risk Prediction</h1>
 
 <p align="center">
   <strong>Predict which orders will arrive late — before they ship.</strong>
@@ -31,7 +31,7 @@
 </p>
 
 <p align="center">
-  <a href="https://supply-chain-optimization-ml.streamlit.app/">
+  <a href="https://late-delivery-risk-prediction.streamlit.app/">
     <img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Open in Streamlit" />
   </a>
 </p>
@@ -52,24 +52,25 @@ Key findings from EDA:
 
 ## Model Comparison
 
-| Model | F1 | Precision | Recall | AUC-ROC |
-|-------|-----|-----------|--------|---------|
-| Logistic Regression (baseline) | 0.6531 | 0.8515 | 0.5297 | 0.7241 |
-| XGBoost (default, depth=6) | **0.6543** | 0.8448 | **0.5338** | 0.7233 |
-| XGBoost (shallow, depth=3) | 0.6532 | 0.8508 | 0.5301 | **0.7253** |
-| XGBoost (deep, depth=8) | 0.6543 | 0.8452 | 0.5337 | 0.7244 |
+Headline split is **temporal** (train on past orders, test on future). Random split is a stability check only.
 
-**Primary metric:** F1 score (accuracy is misleading with 55/45 class split)
+| Model | Split | F1 | Precision | Recall | AUC-ROC |
+|-------|-------|-----|-----------|--------|---------|
+| Logistic Regression (baseline) | temporal | 0.6531 | 0.8515 | 0.5297 | 0.7241 |
+| XGBoost (depth=6) | temporal | **0.6648** | 0.7743 | 0.5825 | 0.7233 |
+| XGBoost (depth=6) | random (stability) | 0.6543 | 0.8448 | 0.5338 | 0.7233 |
+
+**Primary metric:** F1 score (accuracy is misleading with 55/45 class split). Every number traces to [`reports/model_comparison.json`](reports/model_comparison.json).
 
 ## So What — The Business Read
 
-The honest finding: XGBoost adds no meaningful lift over logistic regression (F1 0.6648 vs 0.6531 on the temporal split). After leakage removal, late delivery is near-deterministic from shipping mode alone (First Class 95.3% late, Second Class 76.7%), and SHAP confirms the model re-learns that lookup table. Customer-history features added zero lift.
+The honest finding: XGBoost adds no meaningful lift over logistic regression (F1 **0.6648** vs 0.6531 on the temporal split). After leakage removal, late delivery is near-deterministic from shipping mode alone (First Class 95.3% late, Second Class 76.7%), and SHAP confirms the model re-learns that lookup table. Customer-history features added zero lift.
 
-That is a valid business conclusion, not a failed project. The defensible production design is a shipping-mode rule for the high-risk tiers, plus a model only on the ambiguous Standard Class tier where lateness is genuinely uncertain.
+That is a valid business conclusion, not a failed project. The **recommended** production design is a shipping-mode rule for the high-risk tiers, plus a model only on the ambiguous Standard Class tier where lateness is genuinely uncertain.
 
-- [Limitations & Decisions](docs/LIMITATIONS_AND_DECISIONS.md) — why the rule beats the model, calibration (Brier 0.2028, isotonic adapter), and the cost-driven threshold (0.35, FN ~3x FP).
-- [Business Impact (illustrative)](docs/BUSINESS_IMPACT.md) — net-value formula with labeled assumptions and a break-even of `C_late × r ≈ $3.87`. No invented ROI.
-- [Frozen metrics](reports/model_comparison.json) — every number above traces to a saved run.
+- [Limitations & Decisions](docs/LIMITATIONS_AND_DECISIONS.md) — why the rule beats the model, calibration (Brier 0.2028; isotonic adapter exists but is not wired into serving), and the ops threshold (0.35).
+- [Business Impact (illustrative)](docs/BUSINESS_IMPACT.md) — net-value formula with labeled assumptions. No invented ROI.
+- [Frozen metrics](reports/model_comparison.json) — source of truth for the table above.
 
 > Interview line: "I shipped a leakage-safe classifier with full MLOps scaffolding, then used SHAP to show a 4-row rule already captures most of the signal — so I recommended the simpler tool. The deliverable was the decision, not the model."
 
@@ -90,9 +91,9 @@ flowchart LR
     D --> SHIP[Shipped<br/>Streamlit dashboard plus<br/>limitations and impact docs]
 ```
 
-## Production Decision Logic
+## Recommended Decision Logic (design — not what the demo ships)
 
-What scores each order in production: a deterministic rule on the high-risk shipping modes, and the calibrated model only on the ambiguous Standard Class tier.
+The **recommended** production design below is the interview takeaway from SHAP + EDA. The Streamlit demo today scores **every** shipping mode with the uncalibrated model at threshold **0.35** (an ops compromise — see [Limitations](docs/LIMITATIONS_AND_DECISIONS.md)).
 
 ```mermaid
 flowchart TD
@@ -101,7 +102,7 @@ flowchart TD
     Q -->|Second Class| R2[Rule: flag high risk<br/>late rate 0.77]
     Q -->|Same Day| R3[Rule: flag and monitor<br/>late rate 0.46]
     Q -->|Standard Class| MOD[Model scores this tier<br/>late rate 0.38, genuinely uncertain]
-    MOD --> T{Calibrated risk<br/>at or above 0.35}
+    MOD --> T{Risk at or above 0.35}
     T -->|Yes| FLAG[Flag for intervention]
     T -->|No| OK[Allow to ship]
     R1 --> FLAG
@@ -173,7 +174,7 @@ flowchart LR
 ## Repository Structure
 
 ```
-supply-chain-optimization-ml/
+late-delivery-risk-prediction/
 │
 ├── domain/                          # Business rules (zero external imports)
 │   ├── models.py                    # Order, Product, MetricsResult, RiskCohort
@@ -226,8 +227,8 @@ The encoder is **fit on training data only** (split-before-encode pattern) to pr
 
 ```bash
 # 1. Clone and setup
-git clone https://github.com/tirthjoship/supply-chain-optimization-ml.git
-cd supply-chain-optimization-ml
+git clone https://github.com/tirthjoship/late-delivery-risk-prediction.git
+cd late-delivery-risk-prediction
 make setup
 
 # 2. Quick demo (sample data, included in repo)
@@ -255,9 +256,7 @@ make test     # tests only
 </p>
 -->
 
-A 90-second walkthrough follows the project's story end to end: score a single order and read its SHAP waterfall in the **Risk Predictor**, compare LogReg vs XGBoost in **Model Results** (the honest "no meaningful lift" finding), browse K-Means cohorts in **Customer Segments**, and toggle the sidebar between the 1K sample and full 180K dataset in **Data Explorer**.
-
-Interactive Streamlit dashboard with 4 tabs:
+Interactive Streamlit dashboard with 4 tabs (live demo linked in the badge above):
 
 ```bash
 make app
@@ -283,8 +282,8 @@ docker compose up --build
 Or without Compose:
 
 ```bash
-docker build -t supply-chain-optimization-ml .
-docker run --rm -p 8501:8501 supply-chain-optimization-ml
+docker build -t late-delivery-risk-prediction .
+docker run --rm -p 8501:8501 late-delivery-risk-prediction
 ```
 
 The image runs as a non-root user and exposes Streamlit's `/_stcore/health` endpoint for container health checks.
