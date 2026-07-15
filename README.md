@@ -250,11 +250,9 @@ make test     # tests only
 
 ## Dashboard
 
-<!-- Demo GIF — uncomment the block below after recording assets/streamlit-demo.gif
 <p align="center">
   <img src="assets/streamlit-demo.gif" alt="Dashboard walkthrough" width="760" />
 </p>
--->
 
 Interactive Streamlit dashboard with 4 tabs (live demo linked in the badge above):
 
