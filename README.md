@@ -31,7 +31,7 @@
 </p>
 
 <p align="center">
-  <a href="https://late-delivery-risk-prediction.streamlit.app/">
+  <a href="https://late-delivery-risk-predict.streamlit.app/">
     <img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Open in Streamlit" />
   </a>
 </p>
@@ -174,7 +174,7 @@ flowchart LR
 ## Repository Structure
 
 ```
-late-delivery-risk-prediction/
+risk-prediction/
 │
 ├── domain/                          # Business rules (zero external imports)
 │   ├── models.py                    # Order, Product, MetricsResult, RiskCohort
@@ -227,8 +227,8 @@ The encoder is **fit on training data only** (split-before-encode pattern) to pr
 
 ```bash
 # 1. Clone and setup
-git clone https://github.com/tirthjoship/late-delivery-risk-prediction.git
-cd late-delivery-risk-prediction
+git clone https://github.com/tirthjoship/risk-prediction.git
+cd risk-prediction
 make setup
 
 # 2. Quick demo (sample data, included in repo)
@@ -280,8 +280,8 @@ docker compose up --build
 Or without Compose:
 
 ```bash
-docker build -t late-delivery-risk-prediction .
-docker run --rm -p 8501:8501 late-delivery-risk-prediction
+docker build -t risk-prediction .
+docker run --rm -p 8501:8501 risk-prediction
 ```
 
 The image runs as a non-root user and exposes Streamlit's `/_stcore/health` endpoint for container health checks.
